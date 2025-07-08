@@ -1,0 +1,6 @@
+proc mqtproc {ev id name2 val} {
+storeev I "$val";
+eval $val;
+}
+
+setev mq "mqtproc@run"

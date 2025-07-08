@@ -1,0 +1,223 @@
+
+proc En_ch_c {} {
+    upvar #0 HC_LS HC_LS
+    set HC_LS ""
+    set k 1
+    set i 0
+    objiter
+    while {> $k 0} {
+    set k [objiter 16]
+    if {> $k 0} {
+    set s [objname $k]
+    set r [lindex [reg {\|CSCD$} $s] 0]
+    if {> $r 0} {
+    set HC_LS "$HC_LS\{$s\}"
+    }
+    }
+    }
+}
+
+
+proc Ref_TT {} {
+    upvar #0 HC_TT HC_TT
+    upvar #0 HC_LS ls
+    set n [llength $ls]
+    set str "2730 "
+    set i 0
+    while {< $i $n} {
+    set str "$str [get_hc_rq_tns [lindex $ls $i]]"
+    incr i
+    }
+    set HC_TT [ lindex [lsort -integer -decreasing $str] 0]
+    Sens "ReqTN" $HC_TT
+}
+
+proc Sens {nam val} {
+    sendmess sel "\{\"name\":\"$nam\",\"cmd\":$val,\"type\":1\}"
+}
+
+
+proc compute_pid {pid_ kp ki kd d dTime } {
+    upvar #0 $pid_ pid_var;
+    upvar #0 max_out max_out;
+    upvar #0 HC_TT HC_TT;
+    upvar #0 max_I max_I;
+    upvar #0 min_I min_I; 
+    set min_out $HC_TT;
+    set d_norm [lindex [split [expr "($d * 100) / ($max_out - $min_out)"] "."] 0];
+    set sum [lindex $pid_var 0];
+    set error_diff 0
+    set prev_error [lindex $pid_var 1];    
+    if {> $kd 0} {
+        set error_diff [expr "($d_norm - $prev_error) / $dTime"]
+    }
+
+    set v_percent [max [min [lindex [split [expr "($d_norm * $kp + ($sum + $d_norm ) * $ki * $dTime + $kd * $error_diff) / 1000"] "."] 0] 100] 0];
+    storeev I "d:$d_norm, sum:$sum,  v_percent:($d_norm * $kp + ($sum + $d_norm ) * $ki * $dTime + $kd * $error_diff) / 1000 = $v_percent"
+    set sum [lindex [split [expr "$sum + $d_norm"] "."] 0];
+    set sum [max [min $sum $max_I] $min_I];
+    lset pid_var 0 $sum;
+    lset pid_var 1 $d_norm;
+    set vd [lindex [split [expr "$v_percent * ($max_out - $min_out) / 100"] "."] 0];
+    set v [expr "$min_out + $vd"];
+
+    SensorsPID $ki $kp $kd $sum $d_norm $v_percent $v 
+  
+    return $v;
+}
+
+proc SensorsPID {ki kp kd sum d_norm v_percent v} {
+    Sens "PIDki" [expr "2730 + $ki * 10"]
+    Sens "PIDkp" [expr "2730 + $kp* 10"]
+    Sens "PIDkd" [expr "2730 + $kd* 10"]
+    Sens "PID_sum" [expr "2730 + $sum * 10"]
+    Sens "PID_d_norm" [expr "2730 + $d_norm * 10"]
+    Sens "PID_v_percent" [expr "2730 + $v_percent* 10"]
+    Sens "PID_v" $v  
+}
+
+
+proc pid_work {pid setpoint actual} {
+    upvar #0 $pid pid_
+    upvar #0 kp kp
+    upvar #0 ki ki
+    upvar #0 kd kd
+    upvar #0 dTime dTime    
+
+    set error [expr "$setpoint - $actual"]
+    return [compute_pid pid_ $kp $ki $kd $error $dTime]
+}
+
+proc pid_ini {} {
+set pid {0 0 0}
+return $pid
+}
+
+proc f_pid_1s {} {
+upvar #0 pid_ pid_1
+upvar #0 nameCAS nameCAS
+upvar #0 HC_TT HC_TT
+upvar #0 cur_t cur_t
+upvar #0 LimCP LimCP
+upvar #0 countP countP
+upvar #0 gist_HS gist_HS;
+
+
+Ref_TT
+set cur_t [+ [get_t [objname [get_id_term $nameCAS]]] 2730]
+set cur_set_tns [get_hc_tns $nameCAS]
+set cur_boil_t [lindex [boil_state] 0]
+set cur_boil_state [lindex [boil_state] 1]
+puts "cur_boil_state $cur_boil_state"
+#   set cur_boil_t [+ [get_t "testtn"] 2730]
+
+set alpha 4
+set LimCP_loc $LimCP
+set temp_diff [expr "$cur_t - $HC_TT"]
+set temp_diff_boil [expr "$HC_TT - $cur_boil_t"]
+set a 1
+
+if {<= $temp_diff $gist_HS} {
+set a 1
+} else {
+set a 0
+}
+
+puts "and [<= $temp_diff_boil 50] [== $cur_boil_state 1] "
+if {and [<= $temp_diff_boil 50] [== $cur_boil_state 1] } {
+handle_medium_temp_diff $nameCAS $cur_set_tns $cur_boil_t $LimCP_loc $HC_TT $cur_t $a
+} else {
+set_hc_ts $nameCAS [max $HC_TT [expr "$cur_boil_t * $a"]]
+set pid_1 [pid_ini ]
+}
+}
+
+proc handle_medium_temp_diff {nameCAS cur_set_tns cur_boil_t LimCP HC_TT cur_t a} {
+    puts "PID"
+    upvar #0 countP countP 
+    puts "LimCP $LimCP"
+    set v [pid_work "pid_1" $HC_TT $cur_t]
+    set NEW $v
+    lappend NEW [expr "($cur_boil_t + 10) * $a"]
+    set new_pid_set [lindex [lsort -integer -decreasing $NEW] 0]
+    set_hc_ts $nameCAS $new_pid_set
+
+}
+
+
+proc boil_state {} {
+    upvar #0 ids_adb ids_adb
+    upvar #0 count_adb count_adb
+
+    set i 0
+    set str "2730"
+    set str_state 0
+    while {<= $i $count_adb } {
+    set id [lindex $ids_adb $i];
+    set s [sendmess sel "\{\"req_state\":0,\"id\":$id\}"];
+    set water [expr "[lindex [split [lindex [lindex [split $s ","] 0] 0] ":"] 1]*10+2730"];
+    set state [lindex [split [lindex [lindex [split $s ","] 0] 3] ":"] 1];
+    set str "$str $water"
+    set str_state "$str_state $state"
+    incr i
+    }
+    set cur_boil_t [lindex [lsort -integer -decreasing $str] 0]
+     
+    set cur_boil_state [lindex [lsort -integer -decreasing $str_state] 0]
+
+    return "$cur_boil_t $cur_boil_state"
+}
+
+proc boil_count {} {
+    upvar #0 count_adb count_adb
+    set i 0
+    set str "2730"
+    while {<= $i $count_adb } {
+    set id [lindex $ids_adb $i];
+    set s [sendmess sel "\{\"req_state\":0,\"id\":$id\}"];
+    set water [expr "[lindex [split [lindex [lindex [split $s ","] 0] 0] ":"] 1]*10+2730"];
+    set str "$str $water";
+    incr i
+    }
+    catch {
+    set cur_boil_t [eval "max $str"]
+    }
+    return $cur_boil_t
+}
+
+
+
+// proc boil_hs_state {} {
+// set a [sendmess sel #Y8247?]
+// puts [lindex [split [lindex [split $a "\]"] 1] ","] 5]
+// }
+
+proc boil_hs_ls {} {
+
+}
+
+
+set gist_HS 80
+set HC_LS "";
+set max_out [+ 2730 850];
+set countP 0;
+set LimCP 2;
+set ki 20;
+set kp 60;
+set kd 0;
+set dTime 1
+set nameCAS "|PID";
+set HC_TT 210;
+set max_I "5000"
+set min_I "-$max_I"
+
+
+En_ch_c;
+Ref_TT;
+set_hc_ts $nameCAS $HC_TT;
+set ids_adb [split [lindex [split [sendmess sel #Z6?] ":"] 1] ","];
+set count_adb [ - [llength $ids_adb] 1];
+
+set pid_1 [pid_ini ];
+
+settim "f_pid_1s" 5000 1;

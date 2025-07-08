@@ -1,0 +1,70 @@
+set J 1
+set N 4
+
+
+proc EXX {} {
+upvar #0 HS_LS HS_LS
+upvar #0 N N 
+set HS_LS ""
+set j 1
+while {<= $j $N} {
+set key "\|Src$j"
+set tmp ""
+set k 1
+set i 0
+objiter
+while {> $k 0} {
+set k [objiter 16]
+if {> $k 0} {
+set s [objname $k]
+set r [lindex [reg $key $s] 0]
+if {> $r 0} {
+set tmp "$tmp\{$s\}"
+}
+}
+}
+set HS_LS "$HS_LS\{$tmp\}"
+incr j
+}
+
+}
+
+proc RTT {} {
+upvar #0 J J
+upvar #0 HC_TT HC_TT
+upvar #0 HS_LS HS_LS
+set ls [lindex $HS_LS [- $J 1]]
+set n [llength $ls]
+set str ""
+set i 0
+while {< $i $n} {
+set str "$str [get_hc_tns [lindex $ls $i]]"
+incr i
+}
+catch {
+set HC_TT [eval "max $str"]
+}
+
+}
+
+proc RTS {} {
+  upvar #0 J J
+  upvar #0 N N
+  RTT
+  ST2C
+  incr J
+  if {> $J $N} {
+set J 1
+  }
+
+}
+
+proc ST2C {} {
+  upvar #0 HC_TT HC_TT;
+  upvar #0 J J;
+  set_hc_ts "|Dst${J}" $HC_TT;
+
+}
+
+EXX
+settim "RTS" 5000 1

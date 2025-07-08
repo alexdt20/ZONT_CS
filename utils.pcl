@@ -1,0 +1,19 @@
+proc get_hc_tns {h} {return [lindex [split [lindex [split [string range [sendmess sel [conjoin "" "#Y" [objid "$h" 16] "?"]] 2 20] $] 1] ,] 0]}
+proc get_hc_ts {h} {
+set answ [sendmess sel [conjoin "" "#Y" [objid "$h" 16] "?"]]
+return [lindex [split $answ ,] 1]
+}
+proc set_hc_ts  {h v} {sendmess sel [conjoin "" "#Y" [objid "$h" 16] "=" $v]}
+proc get_rqh {h} {return [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" [objid "$h" 16] "?"]] "\]"] 1] ","] 5]}
+
+proc get_hc_rq_tns {h} {
+set tmp_data [sendmess sel [conjoin "" "#Y" [objid ^$h$ 16] "?"]]
+set req_tns [lindex [split [lindex [split [string range $tmp_data 2 20] $] 1] ,] 0]
+set ind_req [lindex [split [lindex [split $tmp_data "\]"] 1] ","] 5]
+set hc_rq_tns [max [expr "$req_tns * $ind_req"] 2730]
+return $hc_rq_tns
+}
+
+proc get_id_term {n} {return [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" [objid $n]  "?"]] "\]"] 1] ","] 4]}
+proc get_t_boil {id} {return [ * [ + [ / [lindex [split [sendmess sel [conjoin "" "#Y" $id "?"]] ","] 7] 256] 273] 10]}
+proc get_id_boil {} {return [lindex [split [sendmess sel [conjoin "" "#Z" 6 "?"]] ":"] 1]}

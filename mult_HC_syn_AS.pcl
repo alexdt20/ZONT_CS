@@ -1,0 +1,142 @@
+# Запуск 1 раз
+proc find_unique_alis {base} {
+set ALIS_LS {}
+set k 1
+set i 0
+objiter
+while {> $k 0} {
+set k [objiter 16]
+if {> $k  0} {
+set obj_name [objname $k]
+set key "{\\.*$base.*$}"
+set pos [reg [subst $key] $obj_name]
+set rb [lindex $pos 0]
+set re [lindex $pos 1]
+if {> $rb 0} {
+set alis [string range $obj_name $rb $re]
+if {< [lsearch $ALIS_LS $alis] 0} {
+set ALIS_LS "$ALIS_LS\{$alis\}"
+}
+}
+}
+}
+storeev I "Alis LIST $ALIS_LS"
+return $ALIS_LS
+}
+
+proc Check_Src_2_Dst {Src_LS find repl Dst_LS_t} {
+set Dst_LS {}
+set len_LS [llength $Src_LS]
+set i 0
+while {< $i $len_LS} {
+set s [lindex $Src_LS $i]
+set tmp [split $s $find]
+storeev I "$tmp"
+set ns [conjoin "" [lindex $tmp 0] $repl [lindex $tmp [- [llength $tmp] 1]]]
+storeev I "$ns"
+if {< [lsearch $Dst_LS_t $ns] 0 } {
+storeev A "Названия не совпадают для SrcXXX и DstXXX" 
+} else {
+set Dst_LS "$Dst_LS\{$ns\}"
+}
+incr i
+}
+storeev I "$Dst_LS"
+return $Dst_LS
+}
+
+# Запуск 1 раз
+proc En_hc_LS {LS} {
+set N [llength $LS]
+set Src_LS ""
+
+set j 0
+while {< $j $N} {
+
+set key [lindex $LS $j]
+set tmp ""
+set k 1
+set i 0
+objiter
+while {> $k 0} {
+set k [objiter 16]
+if {> $k 0} {
+set s [objname $k]
+set r [lindex [reg $key $s] 0]
+if {> $r 0} {
+set tmp "$tmp\{$s\}"
+}
+}
+}
+set Src_LS "$Src_LS\{$tmp\}"
+incr j
+}
+storeev I "$Src_LS"
+return $Src_LS 
+}
+
+
+# Запуск по J раз
+proc RTT {J} {
+upvar #0 Src_LS Src_LS
+set ls [lindex $Src_LS $J]
+
+set n [llength $ls]
+storeev I "ls  $ls    n $n"
+
+set str "2730"
+set i 0
+while {< $i $n} {
+set str "$str [get_hc_tns [lindex $ls $i]]"
+incr i
+}
+catch {
+set HC_TT [eval "max $str"]
+}
+storeev I "$ls $HC_TT"
+return $HC_TT
+}
+
+
+proc ST2C {key set} {
+set_hc_ts $key  $set;
+storeev I "$key  $set";
+}
+
+proc RTS {} {
+upvar #0 J J  
+upvar #0 Src_LS_a Src_LS_a  
+upvar #0 DST_LS_a DST_LS_a  
+set N [llength $Src_LS_a]
+storeev I "$J"
+set HC_TT [RTT $J]
+set key [lindex $DST_LS_a $J]
+ST2C $key $HC_TT
+incr J
+if {>= $J $N} {
+set J 0
+}
+storeev I "$J"
+}
+
+
+proc ini_sync {} {
+upvar #0 Src_name Src_name  
+upvar #0 Dst_name Dst_name  
+upvar #0 Src_LS_a Src_LS_a
+upvar #0 DST_LS_a DST_LS_a
+upvar #0 Src_LS Src_LS
+
+set Src_LS_a [find_unique_alis $Src_name]
+set DST_LS_t [find_unique_alis $Dst_name]
+set DST_LS_a [Check_Src_2_Dst $Src_LS_a $Src_name $Dst_name $DST_LS_t]
+set Src_LS [En_hc_LS $Src_LS_a]
+}
+
+set J 0
+set Src_name "|Src"
+set Dst_name "|Dst"
+
+ini_sync
+
+settim "RTS" 5000 1
