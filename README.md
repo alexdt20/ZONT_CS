@@ -5,3 +5,5 @@
 Документация на Сценарии 2 ZONT : https://docs.google.com/document/d/1n5BnrRkgcdV2D22Sd6xOP3aeWC6Px4gHgwG8sRJjgxk/edit?tab=t.0#heading=h.d04cvaqy2wsb
 
 База "Сценариев 2" выполнена на основании https://github.com/howerj/pickle с дополнительными функциями
+
+файл **utils.pcl** должен обязательно лежать в ФС контролера
