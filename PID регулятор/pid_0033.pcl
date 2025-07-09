@@ -187,16 +187,6 @@ proc boil_count {} {
 
 
 
-// proc boil_hs_state {} {
-// set a [sendmess sel #Y8247?]
-// puts [lindex [split [lindex [split $a "\]"] 1] ","] 5]
-// }
-
-proc boil_hs_ls {} {
-
-}
-
-
 set gist_HS 80
 set HC_LS "";
 set max_out [+ 2730 850];
@@ -206,7 +196,7 @@ set ki 20;
 set kp 60;
 set kd 0;
 set dTime 1
-set nameCAS "|PID";
+set nameCAS "|PID";# Алис для контура гидрострелки
 set HC_TT 210;
 set max_I "5000"
 set min_I "-$max_I"
