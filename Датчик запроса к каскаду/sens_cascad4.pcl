@@ -2,7 +2,7 @@ set CSCD_gist ""
 set CSCD_req ""
 
 proc getcscd {} {
-set nam "Каскад";
+set nam "Каскад котлов";
 upvar #0 CSCD_req CSCD_req;
 upvar #0 CSCD_gist CSCD_gist;
 set CSCD_id [objid $nam 40];
@@ -17,8 +17,8 @@ getcscd;
 upvar #0 CSCD_req CSCD_req;
 upvar #0 CSCD_gist CSCD_gist;
 set t2 [max 2730 [ -  $CSCD_req $CSCD_gist]];
-sendmess sel "\{\"name\":"Каскад+гист",\"cmd\":[subst $CSCD_req ],\"type\":1\}";
-sendmess sel "\{\"name\":"Каскад-гист",\"cmd\":[subst $t2],\"type\":1\}";
+sendmess sel "\{\"name\":"Каскад ",\"cmd\":[subst $CSCD_req ],\"type\":1\}";
+sendmess sel "\{\"name\":"Каскад - гист",\"cmd\":[subst $t2],\"type\":1\}";
 }
 
 settim "CSCD_sens" 5000 1
