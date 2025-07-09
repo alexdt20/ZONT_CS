@@ -35,7 +35,7 @@ upvar #0 HC_TT HC_TT
 upvar #0 HS_LS HS_LS
 set ls [lindex $HS_LS [- $J 1]]
 set n [llength $ls]
-set str ""
+set str "2730"
 set i 0
 while {< $i $n} {
 set str "$str [get_hc_tns [lindex $ls $i]]"
