@@ -1,6 +1,6 @@
 proc real_t {} {
 set temp [expr "[get_t "|mb1_6"] * 10 - 300 + 2730"];
-objcmd "Температура в канале|real" "$temp" 1;
+objcmd "Temp|real" "$temp" 1;
 }
 
 settim real_t 5000 1
