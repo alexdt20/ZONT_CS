@@ -8,4 +8,4 @@ puts $n
 >mbsend 3 1 0 18
 
 >mbsend 6 1 4 4 280
->mbsend funk mbslaveAdres REG LEN VAL
+>mbsend funk mbslaveAdres REG LEN_data data
