@@ -1,0 +1,5 @@
+>proc mbm {i e n v} {
+puts $n
+}
+
+>setev mb "mbm"
