@@ -3,3 +3,6 @@ puts $n
 }
 
 >setev mb "mbm"
+
+
+>mbsend 3 1 0 18
