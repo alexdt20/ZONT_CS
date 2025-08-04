@@ -1,0 +1,7 @@
+proc speed_hyidmaru {nh ns} {
+set h [objstate $nh 0 0];
+set s min[[lindex [split [expr "($h-500)/70+ 1"] "."] 0], 7];
+objcmd $ns [* $s 10] 10
+}
+
+setev chg speed_hyidmaru@ИмяДатчикаВлажности
