@@ -6,7 +6,7 @@ proc speed_hyidmaru {nh ns} {
 set h [objstate $nh 0 0];
 set s [min [lindex [split [expr "($h-50)/7+ 1"] "."] 0] 7];
 sendmess sel [conjoin "" "#Y" [objid $ns 10] "=2,$s"];
-;# objcmd $ns 2,$s 10 
+;# objcmd $ns 2,$s 10;
 puts "$ns $s"
 }
 
