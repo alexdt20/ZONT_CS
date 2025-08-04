@@ -1,7 +1,14 @@
-proc speed_hyidmaru {nh ns} {
-set h [objstate $nh 0 0];
-set s min[[lindex [split [expr "($h-500)/70+ 1"] "."] 0], 7];
-objcmd $ns [* $s 10] 10
+proc mainHS {} {
+speed_hyidmaru "Влажность в бассейне" "Скорость вентилятора"
 }
 
-setev chg speed_hyidmaru@ИмяДатчикаВлажности
+proc speed_hyidmaru {nh ns} {
+set h [objstate $nh 0 0];
+set s [min [lindex [split [expr "($h-50)/7+ 1"] "."] 0] 7];
+sendmess sel [conjoin "" "#Y" [objid $ns 10] "=2,$s"];
+puts "$ns $s"
+}
+
+
+setev chg mainHS@"Влажность в бассейне"
+settim mainHS 120000 1
