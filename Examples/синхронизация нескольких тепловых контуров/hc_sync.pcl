@@ -1,0 +1,103 @@
+proc f_sync_hs_1s {} {
+  upvar #0 hc_ls ls
+  set n [llength $ls]
+  set i 0
+  while {< $i $n} {
+    f_sync_hc hc$i
+    incr i
+  }
+}
+
+proc send_hc {hc} {
+  upvar #0 tic tic
+  upvar #0 ${hc}v v
+  upvar #0 ${hc}t t
+  upvar #0 ${hc}n n
+  set s [conjoin "" "@HC|" $n "|" $v "|" [ -  $tic $t]]
+  set x [sendmess rs1 $s]
+  set x [sendmess udp $s]
+}
+
+proc f_sync_hc {hc} {
+  upvar #0 tic tic
+  upvar #0 ${hc}v v_
+  upvar #0 ${hc}n n
+  set v [get_hc_ts $n]
+  if {!= $v $v_} {
+    set_hc $hc $v $tic
+    send_hc $hc
+  } else {
+    upvar #0 ${hc}t t_
+    set t [mod [- $tic $t_] 60]
+    if {== $t 0} {
+      send_hc $hc
+    }
+  }
+}
+
+proc set_hc {hc v t} {
+  upvar #0 ${hc}v vv
+  upvar #0 ${hc}t tt
+  set vv $v
+  set tt $t
+}
+
+proc f_inmesg_hc {e i n v} {
+  set i [string first "@HC|" $v]
+  if {>= $i 0} {
+    recv_hc $v
+  }
+}
+
+proc hc_sync_ini {} {
+  upvar #0 hc_ls hc_ls
+  set hc_ls ""
+  set k 1
+  set i 0
+  objiter
+  while {> $k 0} {
+    set k [objiter 16]
+    if {> $k 0} {
+      set s [objname $k]
+      set r [lindex [reg {\*$} $s] 0]
+      if {> $r 0} {
+        set hc_ls "$hc_ls\{$s\}"
+        upvar #0 hc${i}n n$i
+        set n$i "$s"
+        set_hc hc$i 0 0
+        incr i
+      }
+    }
+  }
+}
+
+proc recv_hc {mes} {
+  upvar #0 tic tic
+  upvar #0 hc_ls hc_ls
+  set ls [split $mes "|"]
+  set i [lsearch $hc_ls [lindex $ls 1]]
+  if {>= $i 0} {
+    upvar #0 hc${i}v v
+    upvar #0 hc${i}t t
+    upvar #0 hc${i}n n
+    set x [lindex $ls 2]
+    set dt [lindex $ls 3]
+    if {!= $x $v} {
+      if {<= $dt [ -  $tic $t]} {
+        set_hc "hc$i" $x [ -  $tic $dt]
+        set_hc_ts  $n $x
+      } else {
+        send_hc "hc$i"
+      }
+    } else {
+
+    }
+  }
+}
+
+
+set tic 0
+settim "incr tic" 1000 1
+settim "f_sync_hs_1s" 1000 1
+setev inm "f_inmesg_hc"
+hc_sync_ini  

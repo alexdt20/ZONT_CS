@@ -1,0 +1,77 @@
+proc f_mbt_in {e i n v} {
+  set a [lindex $n 1]
+  upvar #0 mbt${a}_n nam
+  upvar #0 mbt${a}_t  t
+  upvar #0 mbt${a}_s s
+  set x [lindex $n 6]
+  set tt [+ [/ $x 256] [* 256 [mod $x 256]]]
+  set x [lindex $n 11]
+  set ts [+ [+ [/ $x 256] [* 256 [mod $x 256]]] 2730]
+  objcmd $s $ts 27
+  if {!= $t $tt} {
+    set_hc_ts  $nam [+ $tt 2730]
+    set t $tt
+  }
+}
+
+proc mbt_ini {} {
+  upvar #0 mbt_ls mbt_ls
+  set mbt_ls ""
+  set k 1
+  set i 0
+  objiter
+  while {> $k 0} {
+    set k [objiter 255]
+    set s ""
+    catch {set s [objname $k]}
+    set r [lindex [reg {|mb} $s] 0]
+    if {> $r 0} {
+      set t [objtype $k]
+      set a [string range $s [+ 3 [string first "|mb" $s]] 900]
+      if {== $t 16} {
+        if {== [lsearch $mbt_ls $a] -1} {
+          set mbt_ls "$mbt_ls $a"
+          upvar #0 mbt${a}_n mbt${a}_n
+          set  mbt${a}_n $s
+          upvar #0 mbt${a}_t mbt${a}_t
+          set  mbt${a}_t 0
+        }
+      }
+      if {== $t 27} {
+        upvar #0 mbt${a}_s mbt${a}_s
+        set  mbt${a}_s $s
+      }
+    }
+  }
+}
+
+proc f_mbt_sync {} {
+  upvar #0 mbt_cnt mbt_cnt
+  upvar #0 mbt_ls mbt_ls
+  if {< $mbt_cnt [llength $mbt_ls]} {
+    incr mbt_cnt
+  } else {
+    set mbt_cnt 1
+  }
+  set a [lindex $mbt_ls [ -  $mbt_cnt 1]]
+  upvar #0 mbt${a}_n nam
+  upvar #0 mbt${a}_t  t
+  set tt [- [get_hc_ts  $nam] 2730]
+  if {!= $t $tt} {
+    set ls "1 1 1 270 0 54 13 3"
+    lset ls 3 $tt
+    lset ls 5 [gettime m]
+    lset ls 6 [gettime h]
+    lset ls 7 [gettime W]
+    mbsend 16 $a 0 8 $ls
+    set t $tt
+  } else {
+    mbsend 3 $a 0 11
+  }
+}
+
+
+set mbt_cnt 0
+setev mb "f_mbt_in"
+mbt_ini
+settim "f_mbt_sync" 1000 1

@@ -1,0 +1,42 @@
+proc pid_work {pid set2 in} {
+  upvar 1 $pid pid_
+  set kp 10
+  set ki 10
+  set max 100
+  set min 0
+  set sum [lindex $pid_ 0]
+  set d [ -  $set2 $in]
+  set v [ /  [ +  [ *  $d $kp] [ *  $sum $ki]] 1000]
+  if {>= $v $max} {
+    set v $max
+    if {> $d 0} {
+      set d 0
+    }
+  } elseif {<= $v $min} {
+    set v $min
+    if {< $d 0} {
+      set d 0
+    }
+  }
+  set sum [ +  $sum $d]
+  lset pid_ 0 $sum
+  puts [conjoin "" "pid: " $v]
+return $v
+}
+
+proc pid_ini {} {
+  set pid {0 0 0}
+return $pid
+}
+
+proc f_pid_1s {} {
+  upvar #0 pid_1 pid_1
+  upvar #0 v_set v_set
+  set v [pid_work "pid_1" $v_set [get_t "датчик тн"]]
+  objcmd "выход  аналоговый" [conjoin "" "0," $v] 53
+}
+
+
+set pid_1 [pid_ini ]
+set v_set 210
+settim "f_pid_1s" 1000 1

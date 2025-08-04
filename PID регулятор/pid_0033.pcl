@@ -196,7 +196,7 @@ set ki 20;
 set kp 60;
 set kd 0;
 set dTime 1
-set nameCAS "|PID";# РђР»РёСЃ РґР»СЏ РєРѕРЅС‚СѓСЂР° РіРёРґСЂРѕСЃС‚СЂРµР»РєРё
+set nameCAS "|PID";# Алис для контура гидрострелки
 set HC_TT 210;
 set max_I "5000"
 set min_I "-$max_I"

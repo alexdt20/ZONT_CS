@@ -1,0 +1,13 @@
+proc start_pump {} {
+  objcmd $pump_name 1 17
+  settim "stop_pump" [ *  1 3600000] 0
+  settim "start_pump" [ *  3 3600000] 1
+}
+
+proc stop_pump {} {
+  objcmd $pump_name 0 17
+}
+
+
+set pump_name "Мой насос"
+start_pump  

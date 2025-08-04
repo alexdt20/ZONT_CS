@@ -1,0 +1,76 @@
+proc send_hc {hc} {
+  upvar #0 tic tic
+  upvar 1 $hc hc_
+  set name2 [lindex $hc_ 0]
+  set v [lindex $hc_ 1]
+  set t [lindex $hc_ 2]
+  set s [conjoin "" "@HC|" $name2 "|" $v "|" [ -  $tic $t]]
+  set x [sendmess rs1 $s]
+  set x [sendmess udp $s]
+}
+
+proc f_sync_hc {hc} {
+  upvar #0 tic tic
+  upvar 1 $hc hc_
+  set n [lindex $hc_ 0]
+  set v_ [lindex $hc_ 1]
+  set v [get_hc_ts $n]
+  if {!= $v $v_} {
+    set_hc "hc_" $v $tic
+    send_hc "hc_"
+  } else {
+    set t [lindex $hc_ 2]
+    set t [mod [- $tic $t] 60]
+    if {== $t 0} {
+      send_hc "hc_"
+    }
+  }
+}
+
+proc f_sync_hs_1s {} {
+  upvar #0 hc_1 hc_
+  f_sync_hc "hc_"
+}
+
+proc set_hc {hc v t} {
+  upvar 1 $hc hc_
+  lset hc_ 1 $v
+  lset hc_ 2 $t
+}
+
+proc f_inmesg_hc {e i n v} {
+  if {>= [string first "@HC|" $v] 0} {
+    upvar #0 hc_1 hc_
+    recv_hc "hc_" $v
+  }
+}
+
+proc recv_hc {hc mes} {
+  upvar #0 tic tic
+  upvar 1 $hc hc_
+  set n [lindex $hc_ 0]
+  set ls [split $mes "|"]
+  if {>= [string first [lindex $ls 1] $n] 0} {
+    set v [lindex $hc_ 1]
+    set t [lindex $hc_ 2]
+    set x [lindex $ls 2]
+    set dt [lindex $ls 3]
+    if {!= $x $v} {
+      if {<= $dt [ -  $tic $t]} {
+        set_hc "hc_" $x [ -  $tic $dt]
+        set_hc_ts  $n $x
+      } else {
+        send_hc "hc_"
+      }
+    } else {
+
+    }
+  }
+}
+
+
+set hc_1 {"Баня" 0 0}
+set tic 0
+settim "incr tic" 1000 1
+settim "f_sync_hs_1s" 1000 1
+setev inm "f_inmesg_hc"

@@ -1,0 +1,17 @@
+proc pogreb_control {} {
+  set t_up [get_t "погреб верх"]
+  set t_dw [get_t "погреб низ"]
+  set t_out [get_t "улица"]
+  if {and [and [< $t_out $t_up] [< $t_out $t_dw]] [and [>= $t_dw 5] [>= $t_up 5]]} {
+    objcmd "приточка" 1 14
+    puts "Приточка вкл"
+  } else {
+    if {or [and [>= $t_out $t_up] [>= $t_out $t_dw]] [and [< $t_dw 5] [< $t_up 5]]} {
+      objcmd "приточка" 0 14
+      puts "Приточка вЫкл"
+    }
+  }
+}
+
+
+settim "pogreb_control" 60000 1

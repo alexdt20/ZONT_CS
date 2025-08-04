@@ -1,0 +1,35 @@
+proc f_hs_air_1s {} {
+  upvar #0 hc_air_ls hc_air_ls
+  upvar #0 hc_air_ls ls
+  set n [llength $ls]
+  set str ""
+  set i 0
+  while {< $i $n} {
+    set str "$str [get_hc_ts [lindex $ls $i]]"
+    incr i
+  }
+  catch {set max [eval "max $str"]
+  set_hc_ts "contur pza" $max}
+}
+
+proc hc_air_to_tn_ini {} {
+  upvar #0 hc_air_ls hc_air_ls
+  set hc_air_ls ""
+  set k 1
+  set i 0
+  objiter
+  while {> $k 0} {
+    set k [objiter 16]
+    if {> $k 0} {
+      set s [objname $k]
+      set r [lindex [reg {\|A$} $s] 0]
+      if {> $r 0} {
+        set hc_air_ls "$hc_air_ls\{$s\}"
+      }
+    }
+  }
+}
+
+
+hc_air_to_tn_ini
+settim "f_hs_air_1s" 1000 1

@@ -1,0 +1,11 @@
+proc f_counter {e i n v} {
+  upvar #0 sens_cnt sens_cnt
+  set sens_cnt [ +  $sens_cnt 1]
+  set str [conjoin "" "0 " $sens_cnt]
+  objcmd "—чЄтчик импульсов" $str 0
+}
+
+
+setev lo "f_counter@cnt_sens"
+set sens_cnt 0
+objcmd "—чЄтчик импульсов" "0 0" 0

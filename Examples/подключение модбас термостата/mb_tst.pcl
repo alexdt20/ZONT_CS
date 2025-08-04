@@ -1,0 +1,41 @@
+proc f_mbt_in {e i n v} {
+  set a [lindex $n 1]
+  upvar #0 mbt${a}_n nam
+  upvar #0 mbt${a}_t  t
+  upvar #0 mbt${a}_s s
+  set x [lindex $n 6]
+  set tt [+ [/ $x 256] [* 256 [mod $x 256]]]
+  set x [lindex $n 11]
+  set ts [+ [+ [/ $x 256] [* 256 [mod $x 256]]] 2730]
+  objcmd $s $ts
+  if {!= $t $tt} {
+    set_hc_ts  $nam [+ $tt 2730]
+    set t $tt
+  }
+}
+
+proc f_mbt_sync {} {
+  set a 1
+  upvar #0 mbt${a}_n nam
+  upvar #0 mbt${a}_t  t
+  set tt [- [get_hc_ts  $nam] 2730]
+  if {!= $t $tt} {
+    set ls "1 1 1 270 0 54 13 3"
+    lset ls 3 $tt
+    lset ls 5 [gettime m]
+    lset ls 6 [gettime h]
+    lset ls 7 [gettime W]
+    mbsend 16 1 0 8 $ls
+    set t $tt
+    puts "$ls"
+  } else {
+    mbsend 3 1 0 11
+  }
+}
+
+
+set mbt1_t 0
+set mbt1_n "Баня"
+set mbt1_s "Датчик в бане"
+setev mb "f_mbt_in"
+settim "f_mbt_sync" 1000 1

@@ -1,5 +1,5 @@
 proc mainHS {} {
-speed_hyidmaru "Р’Р»Р°Р¶РЅРѕСЃС‚СЊ РІ Р±Р°СЃСЃРµР№РЅРµ" "РЎРєРѕСЂРѕСЃС‚СЊ РІРµРЅС‚РёР»СЏС‚РѕСЂР°"
+speed_hyidmaru "Влажность в бассейне" "Скорость вентилятора"
 }
 
 proc speed_hyidmaru {nh ns} {
@@ -11,5 +11,5 @@ puts "$ns $s"
 }
 
 
-setev chg mainHS@"Р’Р»Р°Р¶РЅРѕСЃС‚СЊ РІ Р±Р°СЃСЃРµР№РЅРµ"
+setev chg mainHS@"Влажность в бассейне"
 settim mainHS 120000 1

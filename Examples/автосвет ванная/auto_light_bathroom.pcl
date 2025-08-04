@@ -1,0 +1,129 @@
+proc f_al_ev {e i n v} {
+  upvar #0 AL_TDO tdo
+  upvar #0 AL_TDC  tdc
+  upvar #0 al_ls_d al_ls_d
+  upvar #0 al_ls_m al_ls_m
+  upvar #0 al_ls_s al_ls_s
+  set n [lsearch $al_ls_d $i]
+  if {>= $n 0} {
+    if {== $e 11} {
+      al_set_tim $n $tdo
+    } else {
+      set k [lindex $al_ls_s $n]
+      set s [objstate $k 0 0]
+      if {!= $s 0} {
+        al_set_tim $n $tdc
+      }
+    }
+  }
+  set n [lsearch $al_ls_m $i]
+  if {>= $n 0} {
+    if {== $e 11} {
+      al_set_tim_motion $n
+    }
+  }
+}
+
+proc auto_light_ini {} {
+  upvar #0 al_ls_s al_ls_s
+  upvar #0 al_ls_d al_ls_d
+  upvar #0 al_ls_m al_ls_m
+  set al_ls ""
+  set k 1
+  set i 0
+  objiter
+  while {> $k 0} {
+    set k [objiter 255]
+    set s ""
+    catch {set s [objname $k]; set t [objtype $k]}
+    set r [lindex [reg {|ALS} $s] 0]
+    if {> $r 0} {
+      set a [string range $s [+ 4 [string first "|ALS" $s]] 900]
+      lset al_ls_s $a $k
+    }
+    set r [lindex [reg {|ALD} $s] 0]
+    if {> $r 0} {
+      set a [string range $s [+ 4 [string first "|ALD" $s]] 900]
+      lset al_ls_d $a $k
+    }
+    set r [lindex [reg {|ALM} $s] 0]
+    if {> $r 0} {
+      set a [string range $s [+ 4 [string first "|ALM" $s]] 900]
+      lset al_ls_m $a $k
+    }
+  }
+}
+
+proc al_on {n on} {
+  upvar #0 al_ls_s al_ls_s
+  set k [lindex $al_ls_s $n]
+  objcmd $k $on
+}
+
+proc f_al_timer {n} {
+  upvar #0 al_ls_m al_ls_m
+  set k [lindex $al_ls_m $n]
+  if {> [objstate $k 1 3] 0} {
+    al_set_tim_motion $n
+  } else {
+    al_on $n 0
+  }
+  puts "timer $n"
+}
+
+proc al_control {} {
+  upvar #0 al_ls_s al_ls_s
+  upvar #0 AL_TCTR AL_TCTR
+  set len [ -  [llength $al_ls_s] 1]
+  for {set n 0} {<= $n $len} {incr n  1} {
+    set k [lindex $al_ls_s $n]
+    if {!= $k 0} {
+      set s [objstate $k 0 0]
+      if {!= $s 0} {
+        set s [gettim "f_al_timer $n" ]
+        if {== $s 0} {
+          al_set_timer $n $AL_TCTR
+        }
+      }
+    }
+  }
+}
+
+proc al_set_tim {n t} {
+  al_on $n 1
+  al_set_timer $n $t
+}
+
+proc al_set_timer {n t} {
+  settim "f_al_timer $n" [ *  $t 1000] 0
+  puts "set tim $n $t"
+}
+
+proc al_set_tim_motion {n} {
+  upvar #0 AL_TL tl
+  upvar #0 AL_TM tm
+  upvar #0 al_ls_d al_ls_d
+  set k [lindex $al_ls_d $n]
+  if {> [objstate $k 1 3] 0} {
+    al_set_tim $n $tm
+  } else {
+    al_set_tim $n $tl
+  }
+}
+
+
+#.alight_bath
+## ”правление светом по датчикам открыти€ двери и движени€
+set AL_N 10
+set AL_TDO 60
+set AL_TDC 12
+set AL_TL 600
+set AL_TM 60
+set AL_TCTR 180
+setev ala "f_al_ev"
+setev rec "f_al_ev"
+set al_ls_s [lrepeat 10 0]
+set al_ls_d $al_ls_s
+set al_ls_m $al_ls_s
+auto_light_ini
+settim "al_control" 60000 1

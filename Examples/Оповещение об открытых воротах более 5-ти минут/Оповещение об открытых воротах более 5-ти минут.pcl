@@ -1,0 +1,21 @@
+proc f_vorota_alarm {ev id name2 val} {
+  if {!= [string first $sensor_vorot $name2] 0} {
+    settim "f_vorota_notif" $vorota_period 0
+  }
+}
+
+proc f_vorota_recovery {ev id name2 val} {
+  if {!= [string first $sensor_vorot $name2] 0} {
+    settim "f_vorota_notif" 0
+  }
+}
+
+proc f_vorota_notif {} {
+  objcmd "SMS: бнпнрю нрйпшрш анкее 5-РХ ЛХМСР" 1 3
+}
+
+
+set sensor_vorot "ялй бнпнрю"
+set vorota_period 300000
+setev ala "f_vorota_alarm"
+setev rec "f_vorota_recovery"
