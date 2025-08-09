@@ -1,5 +1,6 @@
 proc owa_pres {} {
-objcmd "Давление" "0 [get_t давление_owa]"
+set tmp [get_t давление_owa]
+objcmd "Давление" "0 $tmp"
 }
 
 setev chg owa_pres@давление_owa
