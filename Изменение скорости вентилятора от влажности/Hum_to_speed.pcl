@@ -1,5 +1,5 @@
 proc mainHS {} {
-speed_humidity "Г‚Г«Г Г¦Г­Г®Г±ГІГј Гў ГЎГ Г±Г±ГҐГ©Г­ГҐ" "Г‘ГЄГ®Г°Г®Г±ГІГј ГўГҐГ­ГІГЁГ«ГїГІГ®Г°Г "
+speed_humidity "Влажность в бассейне" "Скорость вентилятора"
 }
 
 proc speed_humidity {nh ns} {
@@ -11,5 +11,5 @@ puts "$ns $s"
 }
 
 
-setev chg mainHS@"Г‚Г«Г Г¦Г­Г®Г±ГІГј Гў ГЎГ Г±Г±ГҐГ©Г­ГҐ"
+setev chg mainHS@"Влажность в бассейне"
 settim mainHS 150000 1

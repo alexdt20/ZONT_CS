@@ -1,6 +1,6 @@
 proc owa_pres {} {
-set tmp [get_t РґР°РІР»РµРЅРёРµ_owa]
-objcmd "Р”Р°РІР»РµРЅРёРµ" "0 $tmp"
+set tmp [get_t давление_owa]
+objcmd "Давление" "0 $tmp"
 }
 
-setev chg owa_pres@РґР°РІР»РµРЅРёРµ_owa
+setev chg owa_pres@давление_owa
