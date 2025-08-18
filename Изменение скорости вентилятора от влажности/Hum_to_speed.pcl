@@ -1,8 +1,8 @@
 proc mainHS {} {
-speed_hyidmaru "Влажность в бассейне" "Скорость вентилятора"
+speed_humidity "Г‚Г«Г Г¦Г­Г®Г±ГІГј Гў ГЎГ Г±Г±ГҐГ©Г­ГҐ" "Г‘ГЄГ®Г°Г®Г±ГІГј ГўГҐГ­ГІГЁГ«ГїГІГ®Г°Г "
 }
 
-proc speed_hyidmaru {nh ns} {
+proc speed_humidity {nh ns} {
 set h [objstate $nh 0 0];
 set s [min [lindex [split [expr "($h-50)/7+ 1"] "."] 0] 7];
 sendmess sel [conjoin "" "#Y" [objid $ns 10] "=2,$s"];
@@ -11,5 +11,5 @@ puts "$ns $s"
 }
 
 
-setev chg mainHS@"Влажность в бассейне"
+setev chg mainHS@"Г‚Г«Г Г¦Г­Г®Г±ГІГј Гў ГЎГ Г±Г±ГҐГ©Г­ГҐ"
 settim mainHS 150000 1
