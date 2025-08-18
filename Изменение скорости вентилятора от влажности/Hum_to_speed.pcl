@@ -12,4 +12,4 @@ puts "$ns $s"
 
 
 setev chg mainHS@"Влажность в бассейне"
-settim mainHS 120000 1
+settim mainHS 150000 1
