@@ -1,1 +1,1 @@
-*.json text working-tree-encoding=CP1251
+working-tree-encoding=cp1251 eol=crlf
