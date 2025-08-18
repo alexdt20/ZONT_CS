@@ -1,0 +1,10 @@
+proc info {i e v n} {
+  if {== [objstate "poliv" 1 1 14] 1} {
+    storeev A "Poliv On"
+  } else {
+    storeev A "Poliv OFF"
+  }
+}
+
+
+setev chg "info@Ogorod"
