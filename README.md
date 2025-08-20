@@ -19,3 +19,11 @@
 Раздел **[Examples](./00_Examples)** содержит примеры, выполненные разработчиком ПО ZONT
 
 Файл **MQTT-runn.pcl** - сценарий для загрузки и отладки объемных сценариев через MQTT (настройки MQTT выполняются в интерфейсе ZONT ЛК)
+
+**Дополнительно для изучения:**
+
+[📚 ZONT MQTT](https://docs.google.com/document/d/1JuJVvdGWtXVJxJox-oWP7PqfEYpra0QgJA488m3KHFw/edit?tab=t.0#heading=h.m98n6nkj4s9v)
+
+[📚 ZONT Modbus Rtu](https://docs.google.com/document/d/1XjOHEuJpMY9IqV8XaPX0bLWLuGSE3-uRDPLUh_qEdKo/edit?tab=t.0)
+
+[📚 ZONT WS(JSON)](https://docs.google.com/document/d/10ErPAZ_MGFeN89Erq6on2JHCHVW_1uYS8RLep1xl-ms/edit?tab=t.0)
