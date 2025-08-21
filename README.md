@@ -9,6 +9,8 @@
 
 **[WEB редактор SCRIPTS 2](https://zse2.elifantiev.ru)** - Хочу выразить отдельную благодарность Олегу за его труд
 
+Оффлайн редактор сценариев [Zont_Scripts_Editor_v2.zip](https://drive.google.com/file/d/14QW_hGwSlc3psBsUlFrizpmjhs-m-M5P/view)
+
 Раздел **[Команды](./01_Команды)** содержит управляющие команды для конфигурирования и настройки устройства через Терминал/СМС
 
 Раздел **[Modbus](./02_Modbus)** содержит данные по работе с протоколом modbus через "сценарии 2"
@@ -32,3 +34,4 @@
 [📚 ZONT Modbus Rtu](https://docs.google.com/document/d/1XjOHEuJpMY9IqV8XaPX0bLWLuGSE3-uRDPLUh_qEdKo/edit?tab=t.0)
 
 [📚 ZONT WS(JSON)](https://docs.google.com/document/d/10ErPAZ_MGFeN89Erq6on2JHCHVW_1uYS8RLep1xl-ms/edit?tab=t.0)
+
