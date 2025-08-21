@@ -11,6 +11,8 @@
 
 Оффлайн редактор сценариев [Zont_Scripts_Editor_v2.zip](https://drive.google.com/file/d/14QW_hGwSlc3psBsUlFrizpmjhs-m-M5P/view)
 
+Оффлайн терминал с доступом к ФС (в том числе по RS485) [Progr_v1](https://drive.google.com/file/d/1JEg6Wu409BzNMZkDGUuUK4ZZP6ToX1KM/view****)
+
 Раздел **[Команды](./01_Команды)** содержит управляющие команды для конфигурирования и настройки устройства через Терминал/СМС
 
 Раздел **[Modbus](./02_Modbus)** содержит данные по работе с протоколом modbus через "сценарии 2"
