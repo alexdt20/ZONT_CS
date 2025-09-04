@@ -8,9 +8,7 @@ ________________________
 puts $n
 }
 _____
->proc mbm {i e n v} {
-puts $n
-}
+>setev mb mbm 
 ________________________
 
 
@@ -47,10 +45,7 @@ puts $n
 
 2.2 сообщение 
 
->proc mbm {i e n v} {
-puts $n
-}
-
+>setev mb mbm 
 
 2.3 сообщение
 
