@@ -77,15 +77,15 @@ puts $n
 
  proc f_mbt_sync {} {
  
-   set a 1
+    set a 1
    
-   upvar #0 mbt${a}_n nam
+    upvar #0 mbt${a}_n nam
    
-   upvar #0 mbt${a}_t  t
+    upvar #0 mbt${a}_t  t
    
-   set tt [- [get_hc_ts  $nam] 2730]
+    set tt [- [get_hc_ts  $nam] 2730]
    
-   if {!= $t $tt} {
+    if {!= $t $tt} {
    
   **set ls "1 1 1 270 0 54 13 3"**;# Номерация с 0!  270 - имеет индекс 3, это целевая темпеература 54 -  минуты, 13 часы, 7 день недели 
   
@@ -103,7 +103,7 @@ puts $n
      
      puts "$ls"
      
- } else {
+    } else {
    
      mbsend 3 1 0 11
    }
