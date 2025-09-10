@@ -103,7 +103,7 @@ proc f_mbt_sync {} {
     
     puts "$ls"
     
-  } else {
+} else {
   
     mbsend 3 1 0 11
   }
