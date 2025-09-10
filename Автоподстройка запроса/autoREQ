@@ -1,0 +1,50 @@
+#.autoREQ
+proc UP {} {
+set req [get_hc_tns {^Гидрострелка$}];
+set cor [expr "[objstate "WB_Компенсатор" 0 0 10]*2"];
+set_hc_ts "TEST" [lindex [split [expr "$req + $cor"] "."] 0]
+}
+
+proc DOWN {} {
+if {> [objstate "WB_Компенсатор" 0 0 10] 0} {
+objcmd "PID_ANO" 2
+}
+}
+
+proc COMP {} {
+set state [boil_state];
+puts $state;
+set trig [ * $state [objstate "WB_Компенсатор" 0 0 10]];
+if {> $trig 0} {
+UP
+} else {
+DOWN
+}
+}
+
+proc boil_state {} {
+upvar #0 count_adb count_adb
+upvar #0 ids_adb ids_adb
+set i 1
+set str ""
+while {<= $i $count_adb } {
+set id [lindex $ids_adb [- $i 1]];
+set s [sendmess sel "\{\"req_state\":0,\"id\":$id\}"];
+set state [lindex [split [lindex [lindex [split $s ","] 0] 3] ":"] 1]
+set str "$str $state";
+incr i
+}
+set str [lsort  -integer $str];
+return [lindex $str 0]
+}
+
+proc get_hc_tns {h} {return [lindex [split [lindex [split [string range [sendmess sel [conjoin "" "#Y" [objid "$h" 16] "?"]] 2 20] $] 1] ,] 0]}
+proc get_hc_ts {h} {
+set answ [sendmess sel [conjoin "" "#Y" [objid "$h" 16] "?"]];
+return [lindex [split $answ ,] 1]
+}
+proc set_hc_ts  {h v} {sendmess sel [conjoin "" "#Y" [objid "$h" 16] "=" $v]}
+
+set ids_adb [split [lindex [split [sendmess sel #Z6?] ":"] 1] ","];
+set count_adb [llength $ids_adb];
+settim COMP 2000 1
