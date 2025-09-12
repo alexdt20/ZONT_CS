@@ -1,0 +1,50 @@
+#.MD1
+
+proc COMP {} {
+set state [boil_state];
+puts $state;
+set cor [expr "[objstate "WB_COR|COMP" 0 0 10]*2"]
+set trig [+ $state $cor];
+if {> $state 0} {
+UPDATE $cor
+} elseif { > $cor 0} {
+objcmd "COR_AO" 2 15
+UPDATE $cor
+}
+}
+
+
+proc UPDATE {cor} {
+set req [get_hc_tns "|HSep"];
+set_hc_ts "TEST" [lindex [split [expr "$req + $cor"] "."] 0]
+}
+
+
+proc boil_state {} {
+upvar #0 count_adb count_adb
+upvar #0 ids_adb ids_adb
+set i 1
+set str ""
+while {<= $i $count_adb } {
+set id [lindex $ids_adb [- $i 1]];
+set s [sendmess sel "\{\"req_state\":0,\"id\":$id\}"];
+set state [lindex [split [lindex [lindex [split $s ","] 0] 3] ":"] 1]
+set str "$str $state";
+incr i
+}
+set str [lsort  -integer $str];
+return [lindex $str 0]
+}
+
+proc get_hc_tns {h} {return [lindex [split [lindex [split [string range [sendmess sel [conjoin "" "#Y" [objid "$h" 16] "?"]] 2 20] $] 1] ,] 0]}
+proc get_hc_ts {h} {
+set answ [sendmess sel [conjoin "" "#Y" [objid "$h" 16] "?"]];
+return [lindex [split $answ ,] 1]
+}
+proc set_hc_ts  {h v} {sendmess sel [conjoin "" "#Y" [objid "$h" 16] "=" $v]}
+
+set ids_adb [split [lindex [split [sendmess sel #Z6?] ":"] 1] ","];
+set count_adb [llength $ids_adb];
+settim COMP 5000 1
+
+
