@@ -132,7 +132,7 @@ def create_homed_command(device_id, config, state_data):
                     "inPattern": "{{ json.f }}",
                     "inTopic": f"homeassistant/climate/5EDB89AEDC88/{device_id}/state"
                 },
-                "system_mode": {
+                "systemMode": {
                     "inPattern": "{{ json.m }}",
                     "inTopic": f"homeassistant/climate/5EDB89AEDC88/{device_id}/state"
                 },
@@ -143,7 +143,13 @@ def create_homed_command(device_id, config, state_data):
             },
             "cloud": False,
             "discovery": False,
-            "exposes": ["thermostat"],
+            "exposes": [
+                "thermostat",
+                "fail",
+                "mode_id",
+                "mode",
+                "fault"
+            ],
             "id": f"climate_{device_id}",
             "name": config['name'],
             "note": "",
