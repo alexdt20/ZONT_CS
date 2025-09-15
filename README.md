@@ -42,3 +42,5 @@
 Запрос тепла к промежуточному контуру
 
 Исполнительное устройство - ПИД регулятор
+
+Для настройки можно посмотреть https://inner.su/services/kalkulyator-nastroyki-pid-regulyatorov/
