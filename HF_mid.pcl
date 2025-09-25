@@ -1,0 +1,8 @@
+proc HF_mid {} {
+    set t1 [get_t "ТН_ТП-Обратка|NTC3"];
+    set t2 [get_t "MDT_Пол"];
+    set tmp [expr "($t1+$t2)/2+2730"];
+    objcmd "HF_mid" $tmp 1
+}
+
+settim HF_mid 5000 1
