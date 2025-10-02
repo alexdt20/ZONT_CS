@@ -1,8 +1,6 @@
 proc HF_set {} {
-set out_T [get_t "Погода из интернета"];
-set req_T [lindex [split [expr "-6/100000 * [pow $out_T 2] - 20119/100000 * $out_T +30114/10"] "."] 0];
-set_hc_ts "ТП|Src" $req_T;
-set_hc_ts "ТП_смес" [- $req_T 1 ];
+set tmp [get_hc_tns {^ТП_смес$}] 
+set_hc_ts {^ТП$} $tmp
 }
 
 setev min HF_set 
