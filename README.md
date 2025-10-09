@@ -44,3 +44,12 @@
 Исполнительное устройство - ПИД регулятор
 
 Для настройки можно посмотреть https://inner.su/services/kalkulyator-nastroyki-pid-regulyatorov/
+
+
+Соответствие платы и устройства 
+
+Climatik 1.1 : 621
+
+Climatik 1.2 : 622
+
+Climatik 1.3 : 620
