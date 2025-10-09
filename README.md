@@ -53,3 +53,9 @@ Climatik 1.1 : 621
 Climatik 1.2 : 622
 
 Climatik 1.3 : 620
+
+H1000pro+V2 : 722
+
+H2000pro+V2 : 723
+
+H2000pro+ : 710
