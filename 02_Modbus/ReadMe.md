@@ -4,7 +4,7 @@ https://www.modbustools.com/download.html
 
 Функция для просмотра лога - что летит по мб в устройство (и вообще есть ли там что)
 ________________________
->proc mbm {i e n v} {
+\>proc mbm {i e n v} {
 puts $n
 }
 _____
