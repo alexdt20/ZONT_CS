@@ -1,0 +1,10 @@
+proc HF_sens {} {
+set temp1 [get_t "ТН_ТП-Обратка"]
+set temp2 [get_t "MDT_Пол"]
+set mid [expr "($temp1 + $temp2)/2 + 2730"]
+objcmd HF_mid $mid 1
+set max [+ [max $temp1 $temp2] 2730]
+objcmd HF_max $max 1
+}
+
+settim HF_sens 10000 1
