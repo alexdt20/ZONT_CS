@@ -1,45 +1,26 @@
-proc TP_ManageTemperature {} {
+proc TPIon {} {
     set current_temp [get_t "MDT_Пол"]
-    set target_temp [TP_CalculateTargetTemp]
+    set target_temp [expr "[get_hc_ts {^ТП_RoomT$}] - 2730"]
     
-    if {[TP_ShouldHeat $current_temp $target_temp]} {
-        TP_StartHeating $current_temp $target_temp
+    storeev I "Проверка: $current_temp vs $target_temp"
+    
+    if {<= $current_temp $target_temp} {
+        objcmd RoomNC "0 20"
+        settim TPIoff 900000  ; # 15 минут нагрева
+        settim timeTPI 0
     } else {
-        TP_ScheduleCheck
+        settim timeTPI 20000 1  ; # 20 секунд
     }
 }
 
-proc TP_CalculateTargetTemp {} {
-    return [expr "[get_hc_ts {^ТП_RoomT$}] - 2730"]
-}
-
-proc TP_ShouldHeat {current target} {
-    return [eval "<= $current $target"]
-}
-
-proc TP_StartHeating {current target} {
-    storeev I "Heating: $current <= $target"
-    objcmd RoomNC "0 20"
-    settim TP_StopHeating 900000
-    settim TP_TemperatureCheck 0
-}
-
-proc TP_ScheduleCheck {} {
-    storeev I "Scheduling temperature check"
-    settim TP_TemperatureCheck 20000 1
-}
-
-proc TP_StopHeating {} {
-    storeev I "Stopping heating"
+proc TPIoff {} {
+    storeev I "Выключение ТП"
     objcmd RoomNC "0 180"
-    settim TP_ManageTemperature 600000
+    settim TPIon 600000  ; # Проверить через 10 минут
 }
 
-proc TP_CheckTimer {} {
-    storeev I "Timer check"
-    if {== [gettim "TP_StopHeating"] 0} {
-        TP_ManageTemperature
+proc timeTPI {} {
+    if {[gettim "TPIoff"] == 0} {
+        TPIon
     }
 }
-
-TP_ManageTemperature
