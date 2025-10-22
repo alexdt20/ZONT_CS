@@ -58,7 +58,6 @@ proc TP_CheckTimer {} {
     }
 }
 
-# Алиасы для обратной совместимости
 proc TPIon {} { TP_ManageTemperature }
 proc TPIon1 {} { TP_ScheduleCheck }
 proc TPIoff {} { TP_StopHeating }
