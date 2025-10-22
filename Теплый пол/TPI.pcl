@@ -41,3 +41,5 @@ proc TP_CheckTimer {} {
         TP_ManageTemperature
     }
 }
+
+TP_ManageTemperature
