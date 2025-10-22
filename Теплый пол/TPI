@@ -1,0 +1,65 @@
+# Конфигурационные константы
+set ::TP_CONFIG {
+    temp_sensor    "MDT_Пол"
+    temp_pattern   {^ТП_RoomT$}
+    temp_offset    2729
+    heating_time   900000
+    delay_time     600000
+    check_interval 20000
+    room_nc_heat   "0 20"
+    room_nc_cool   "0 180"
+}
+
+# Основная логика управления температурой
+proc TP_ManageTemperature {} {
+    set current_temp [get_t "MDT_Пол"]
+    set target_temp [TP_CalculateTargetTemp]
+    
+    if {[TP_ShouldHeat $current_temp $target_temp]} {
+        TP_StartHeating $current_temp $target_temp
+    } else {
+        TP_ScheduleCheck
+    }
+}
+
+# Вспомогательные процедуры
+proc TP_CalculateTargetTemp {} {
+    return [expr "[get_hc_ts {^ТП_RoomT$}] - 2730"]
+}
+
+proc TP_ShouldHeat {current target} {
+    return [eval "<= $current $target"]
+}
+
+proc TP_StartHeating {current target} {
+    storeev I "Heating: $current <= $target"
+    objcmd RoomNC $::TP_CONFIG(room_nc_heat)
+    settim TP_StopHeating $::TP_CONFIG(heating_time)
+    settim TP_TemperatureCheck 0
+}
+
+proc TP_ScheduleCheck {} {
+    storeev I "Scheduling temperature check"
+    settim TP_TemperatureCheck $::TP_CONFIG(check_interval) 1
+}
+
+# Процедуры остановки нагрева
+proc TP_StopHeating {} {
+    storeev I "Stopping heating"
+    objcmd RoomNC $::TP_CONFIG(room_nc_cool)
+    settim TP_ManageTemperature $::TP_CONFIG(delay_time)
+}
+
+# Процедура проверки таймера
+proc TP_CheckTimer {} {
+    storeev I "Timer check"
+    if {[gettim "TP_StopHeating"] == 0} {
+        TP_ManageTemperature
+    }
+}
+
+# Алиасы для обратной совместимости
+proc TPIon {} { TP_ManageTemperature }
+proc TPIon1 {} { TP_ScheduleCheck }
+proc TPIoff {} { TP_StopHeating }
+proc timeTPI {} { TP_CheckTimer }
