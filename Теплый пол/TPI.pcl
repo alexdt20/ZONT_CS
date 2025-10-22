@@ -1,26 +1,28 @@
 proc TPIon {} {
-    set current_temp [get_t "MDT_Пол"]
-    set target_temp [expr "[get_hc_ts {^ТП_RoomT$}] - 2730"]
-    
-    storeev I "Проверка: $current_temp vs $target_temp"
-    
-    if {<= $current_temp $target_temp} {
-        objcmd RoomNC "0 20"
-        settim TPIoff 900000  ; # 15 минут нагрева
-        settim timeTPI 0
-    } else {
-        settim timeTPI 20000 1  ; # 20 секунд
-    }
+set curTemp [get_t "MDT_Пол"]
+set tarTemp [expr "[get_hc_ts {^ТП_RoomT$}] - 2730"]
+puts "Проверка: $curTemp <= $tarTemp"
+if {<= $curTemp $tarTemp} {
+TPIon1
+} else {
+settim timeTPI 20000 1
+}
+}
+
+proc TPIon1 {} {
+objcmd RoomNC "0 20"
+settim TPIoff 900000
+settim timeTPI 0
 }
 
 proc TPIoff {} {
-    storeev I "Выключение ТП"
-    objcmd RoomNC "0 180"
-    settim TPIon 600000  ; # Проверить через 10 минут
+puts "Выключение ТП"
+objcmd RoomNC "0 180"
+settim TPIon 600000
 }
 
 proc timeTPI {} {
-    if {[gettim "TPIoff"] == 0} {
-        TPIon
-    }
+if {== [gettim "TPIoff"] 0} {
+TPIon
+}
 }
