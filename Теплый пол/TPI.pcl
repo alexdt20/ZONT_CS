@@ -37,7 +37,7 @@ proc TP_StopHeating {} {
 
 proc TP_CheckTimer {} {
     storeev I "Timer check"
-    if {[gettim "TP_StopHeating"] == 0} {
+    if {== [gettim "TP_StopHeating"] 0} {
         TP_ManageTemperature
     }
 }
