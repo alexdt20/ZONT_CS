@@ -1,5 +1,5 @@
 proc dhw_sens {} {
-set s [sendmess sel "{\"req_state\":0,\"id\":4097}"]
+set s [sendmess sel "\{\"req_state\":0,\"id\":4096\}"]
 set dhw [expr "[lindex [split [lindex [lindex [split $s ","] 0] 1] ":"] 1]*10+2730"]
 sendmess sel "{\"name\":"DHW",\"cmd\":$dhw,\"type\":1}"
 }
