@@ -1,7 +1,7 @@
 proc f_mbt_in {e i n v} {
   set a [lindex $n 1]
   upvar #0 mbt${a}_n nam
-  upvar #0 mbt${a}_t  t
+  upvar #0 mbt${a}_t t
   upvar #0 mbt${a}_s s
   set x [lindex $n 6]
   set tt [+ [/ $x 256] [* 256 [mod $x 256]]]
