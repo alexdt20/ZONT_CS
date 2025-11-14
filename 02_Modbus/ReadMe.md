@@ -3,9 +3,9 @@ https://www.modbustools.com/download.html
 
 Для анализа ответов в побитовом виде удобно использовать:
 
-string dec2hex 256   >>  0100
+\>string dec2hex 256   >>  0100
 
-string hex2dec 0100  >>  256
+\>string hex2dec 0100  >>  256
 
 
 Функция для просмотра лога - что летит по мб в устройство (и вообще есть ли там что)
