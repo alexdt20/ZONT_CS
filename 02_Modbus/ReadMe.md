@@ -11,9 +11,9 @@ string hex2dec 0100  >>  256
       proc d2b {n} {
           set binary ""
           while {> $num 0} {
-              set bit [% $num  2]
+              set bit [% $n  2]
               set binary "$bit$binary"
-              set num [/ $num 2]
+              set num [/ $n 2]
           }
           return $binary
       }
