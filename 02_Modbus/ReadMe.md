@@ -8,13 +8,21 @@ string dec2hex 256   >>  0100
 string hex2dec 0100  >>  256
 
    proc d2b {n} {
+   
        set binary ""
+       
        while {> $num 0} {
+       
            set bit [% $num  2]
+           
            set binary "$bit$binary"
+           
            set num [/ $num 2]
+           
        }
+       
        return $binary
+       
    }
 
 
