@@ -7,16 +7,18 @@ string dec2hex 256   >>  0100
 
 string hex2dec 0100  >>  256
 
+Функция для получения битовой маски (перевод dec >> bin):
 
       proc d2b {n} {
           set binary ""
           while {> $num 0} {
-              set bit [% $n  2]
+              set bit [mod $n  2]
               set binary "$bit$binary"
-              set num [/ $n 2]
+              set n [/ $n 2]
           }
           return $binary
       }
+
 
 
 
