@@ -1,0 +1,17 @@
+set s {#Y4106$3002,0,33,28,488800,0}
+set s1 [split [lindex [split [string range $s 2 30] $] 1] ,]
+set T [lindex $s1 0]
+set state [lindex $s1 3]
+
+
+___________________
+proc u_sens {} {
+set s [sendmess sel "#Y4104?"]
+set u1 [lindex [split $s ","] 2]
+objcmd "Заряд" "0 $u1" 0
+}
+
+settim "u_sens" 5000 1
+__________________
+
+sendmess sel "{\"name\":"u1",\"cmd\":$u1,\"type\":0}"
