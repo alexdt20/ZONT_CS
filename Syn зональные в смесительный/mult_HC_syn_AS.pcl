@@ -1,4 +1,4 @@
-# Запуск 1 раз
+# Р—Р°РїСѓСЃРє 1 СЂР°Р·
 proc find_unique_alis {base} {
 set ALIS_LS {}
 set k 1
@@ -35,7 +35,7 @@ storeev I "$tmp"
 set ns [conjoin "" [lindex $tmp 0] $repl [lindex $tmp [- [llength $tmp] 1]]]
 storeev I "$ns"
 if {< [lsearch $Dst_LS_t $ns] 0 } {
-storeev A "Названия не совпадают для SrcXXX и DstXXX" 
+storeev A "РќР°Р·РІР°РЅРёСЏ РЅРµ СЃРѕРІРїР°РґР°СЋС‚ РґР»СЏ SrcXXX Рё DstXXX" 
 } else {
 set Dst_LS "$Dst_LS\{$ns\}"
 }
@@ -45,7 +45,7 @@ storeev I "$Dst_LS"
 return $Dst_LS
 }
 
-# Запуск 1 раз
+# Р—Р°РїСѓСЃРє 1 СЂР°Р·
 proc En_hc_LS {LS} {
 set N [llength $LS]
 set Src_LS ""
@@ -76,7 +76,7 @@ return $Src_LS
 }
 
 
-# Запуск по J раз
+# Р—Р°РїСѓСЃРє РїРѕ J СЂР°Р·
 proc RTT {J} {
 upvar #0 Src_LS Src_LS
 set ls [lindex $Src_LS $J]
