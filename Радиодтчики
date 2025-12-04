@@ -33,7 +33,7 @@ proc Radio_ini {} {
     if {> $r 0} {
       set t [objtype $k]
       set a [string range $s [+ 3 [string first "rd" $s]] 900]
-      if {== $t 16} {
+      if {== $t 8} {
         if {== [lsearch $rad_ls $a] -1} {
           set rad_ls "$rad_ls $a"
           upvar #0 rad${a}_n rad${a}_n
@@ -41,10 +41,6 @@ proc Radio_ini {} {
           upvar #0 rad${a}_t rad${a}_t
           set  rad${a}_t 0
         }
-      }
-      if {== $t 27} {
-        upvar #0 rad${a}_s rad${a}_s
-        set  rad${a}_s $s
       }
     }
   }
