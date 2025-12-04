@@ -17,3 +17,35 @@ __________________
 sendmess sel "{\"name\":"u1",\"cmd\":$u1,\"type\":0}"
 
 #Z4106=8,'822119',26,'Радиореле',0,0,10,80,30,5,1200000,60000,[],[],[],[],4103,0,[],[],0,0,[],0
+
+
+proc Radio_ini {} {
+  upvar #0 rad_ls rad_ls
+  set rad_ls ""
+  set k 1
+  set i 0
+  objiter
+  while {> $k 0} {
+    set k [objiter 255]
+    set s ""
+    catch {set s [objname $k]}
+    set r [lindex [reg {rd} $s] 0]
+    if {> $r 0} {
+      set t [objtype $k]
+      set a [string range $s [+ 3 [string first "rd" $s]] 900]
+      if {== $t 16} {
+        if {== [lsearch $rad_ls $a] -1} {
+          set rad_ls "$rad_ls $a"
+          upvar #0 rad${a}_n rad${a}_n
+          set  rad${a}_n $s
+          upvar #0 rad${a}_t rad${a}_t
+          set  rad${a}_t 0
+        }
+      }
+      if {== $t 27} {
+        upvar #0 rad${a}_s rad${a}_s
+        set  rad${a}_s $s
+      }
+    }
+  }
+}
