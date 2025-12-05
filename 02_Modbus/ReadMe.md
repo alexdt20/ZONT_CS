@@ -6,16 +6,26 @@ ________________________
 
 Правый битовый сдвиг для  реальных значений
 
->proc mbm {i e n v} {
+\>proc mbm {i e n v} {
+
 set len [llength $v];
+
 set Rdata "";
+
 set i 0;
+
 while {< $i $len} {
+
 set s [lindex $v $i];
+
 set Rdata "$Rdata [rshift $s 8]";
+
 incr i
+
 };
+
 puts $Rdata;
+
 }
 
 ________________________
