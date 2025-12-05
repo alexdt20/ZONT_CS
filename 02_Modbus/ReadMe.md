@@ -2,6 +2,18 @@
 https://www.modbustools.com/download.html
 
 Для анализа ответов в побитовом виде удобно использовать:
+
+      >proc d2b {num} {
+      set bits "";
+      set i 1;
+      while {> $num 0} {
+      set remainder [mod $num 2];
+      set bits "[max [* $remainder $i] 0]-$bits";
+      set num [/ $num 2];
+      incr i;
+      };
+      return $bits;
+      }
 ________________________
 
 Правый битовый сдвиг для  реальных значений
