@@ -49,7 +49,7 @@ set LsBoil "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]
 
 
 
-// Установка +50 для главного
+// Установка +50 для главного. Часть 1
 proc SetTCas {} {
 set cLsB [fcurLsBoil];
 set sT [get_t "КаскадЗапрос"];
@@ -60,6 +60,7 @@ SetMask $i $len $cLsB $sT;
 incr i;
 }
 }
+// Установка +50 для главного. Часть 2
 
 proc SetMask {i len cLsB sT} {
 set mask [conjoin "|" [lindex $cLsB [- $i 1]]];
