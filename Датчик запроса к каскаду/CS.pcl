@@ -1,0 +1,130 @@
+// >puts [sendmess sel #Y10813?]
+// < #Y10813$[8201],[8201],[3423],[10814,8388,8430,8374,8416],607930,0,0,8201,3423,34
+// >puts [sendmess sel #Z10813?]
+// < #Z10813:40,'Каскад котлов',[8212,8211,8201],1,25,0,4103,1,0,90,100,30
+
+
+// >set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,] 
+
+
+// set s {#Y10813$[8201],[8201],[3423],[10814,8388,8430,8374,8416],607930,0,0,8201,3423,34}
+// set MainBiol [lindex [split [lindex [split $s "\]"] 4] ","] 4]
+
+
+set CSCD_id [objid "Каскад котлов" 40];
+
+proc idMain {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_state [getState $CSCD_id];
+set idMain [lindex $CSCD_state [ -  [llength $CSCD_state] 3]];
+return $idMain
+}
+
+proc CSCD_req {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_state [getState $CSCD_id];
+set CSCD_req [lindex $CSCD_state [ -  [llength $CSCD_state] 2]];
+return $CSCD_req
+}
+
+
+proc fcurLsBoil {} {
+upvar #0 CSCD_id CSCD_id;
+set MainBoil [idMain];
+set lsBoil [fLSBoilProp $CSCD_id];
+set pos [lsearch $lsBoil $MainBoil];
+set LenLsBiol [llength $lsBoil];
+set lsBoil [fLsBoil $lsBoil $pos $LenLsBiol]
+}
+
+proc fLSBoilProp {id} {
+set s [getProp $id];
+set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
+return $LsBoil;
+}
+
+proc fLsBoil {lsBoil pos LenLsBiol} {
+set LsBoil "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]"
+}
+
+
+
+// Установка +50 для главного
+proc SetTCas {} {
+set cLsB [fcurLsBoil];
+set sT [get_t "КаскадЗапрос"];
+set len [llength $cLsB];
+set i 1;
+while {<= $i $len} {
+SetMask $i $len $cLsB $sT;
+incr i;
+}
+}
+
+proc SetMask {i len cLsB sT} {
+set mask [conjoin "|" [lindex $cLsB [- $i 1]]];
+set sTemp [expr "$sT + 2730 + 50 - 120 * ($i - 1) "];
+set_hc_ts "$mask" $sTemp;
+puts "[objname [lindex $cLsB [- $i 1]] ] $sTemp"
+}
+
+
+
+
+
+proc CountBoil {} {
+upvar #0 LsBoil LsBoil;
+upvar #0 CS_id CS_id;
+set s [getState $CS_id]
+set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
+set LenLsBiol [llength $LsBoil];
+return $LenLsBiol
+}
+
+proc getState {id} {
+set s [sendmess sel [conjoin "" "#Y" $id "?"]];
+return $s
+}
+
+proc getProp {id} {
+set s [sendmess sel [conjoin "" "#Z" $id "?"]];
+return $s
+}
+
+
+set LenLsBiol 0
+proc testTVI {} {
+upvar #0 CountB CountB;
+upvar #0 TVI TVI;
+set cB [CountBoil];
+if {!= $CountB $cB} {
+set CountB $cB;
+set TVI 0;
+pubSensT TVI $TVI;
+} else {
+set TVI [calcTVI $TVI];
+pubSensT TVI $TVI
+}}
+
+set TVI 0;
+set CountB 0;
+
+proc calcTVI {tvi} {
+set cT [get_t [objname "4103"]];
+set sT [get_t "КаскадЗапрос"];
+set dT [- $cT $sT];
+set TVI [lindex [split [expr "$tvi + $dT/20"] "."] 0];
+return $TVI
+}
+
+
+proc pubSensT {n v} {
+sendmess sel "\{\"name\":\"$n\",\"cmd\":[+ $v 2730],\"type\":1\}"
+}
+
+settim testTVI 5000 1
+
+puts "$n $v"
+
+sendmess sel "\{\"name\":\"$n\",\"cmd\":$v,\"type\":1\}"
+
