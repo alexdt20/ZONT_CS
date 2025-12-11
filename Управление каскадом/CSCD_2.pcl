@@ -14,6 +14,15 @@
 set CSCD_id [objid "Каскад котлов" 40];
 
 
+;//Получение запроса к каскаду
+proc CSCD_req {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_state [split [getState $CSCD_id] ","];
+set CSCD_req [lindex $CSCD_state [ -  [llength $CSCD_state] 2]];
+return $CSCD_req
+}
+
+
 ;#// Запрос ведущего котла
 proc idMain {} {
 upvar #0 CSCD_id CSCD_id;
@@ -23,12 +32,12 @@ return $idMain
 }
 
 
-;//  Запрос уставки каскада
-proc CSCD_req {} {
+;#//Запрос списка котлов в каскаде в моменте
+proc f_get_lsWkBoil {} {
 upvar #0 CSCD_id CSCD_id;
-set CSCD_state [getState $CSCD_id];
-set CSCD_req [lindex $CSCD_state [ -  [llength $CSCD_state] 2]];
-return $CSCD_req
+set s [getState $CSCD_id];
+set lsWkBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ","];
+return $lsWkBoil
 }
 
 
@@ -42,25 +51,25 @@ return $LsBoil;
 
 
 ;#// Формирование списка котлов по порядку
-proc fcurLsBoil {} {
+proc fCurLsBoil {} {
 upvar #0 CSCD_id CSCD_id;
 set MainBoil [idMain];
-set lsBoil [fLSBoilProp $CSCD_id];
+set lsBoil [fLSBoilProp];
 set pos [lsearch $lsBoil $MainBoil];
 set LenLsBiol [llength $lsBoil];
-return [fLsBoil $lsBoil $pos $LenLsBiol]
+return [fSortLsBoil $lsBoil $pos $LenLsBiol]
 }
 
 
 ;#// Сортировка котлов "от ведущего"
-proc fLsBoil {lsBoil pos LenLsBiol} {
-set LsBoil "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]"
+proc fSortLsBoil {lsBoil pos LenLsBiol} {
+return "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]"
 }
 
 
 ;#// Назначение уставок
 proc SetTCas {} {
-set cLsB [fcurLsBoil];
+set cLsB [fCurLsBoil];
 set sT [get_t "КаскадЗапрос"];
 set len [llength $cLsB];
 set i 1;
@@ -72,11 +81,23 @@ incr i;
 
 ;#// Расчет и применение уставки по списку из "Назначение уставок"
 proc SetMask {i len cLsB sT} {
-set mask [conjoin "|" [lindex $cLsB [- $i 1]]];
-set sTemp [expr "$sT + 2730 + 60 - 140 * ($i - 1) "];
+set id [lindex $cLsB [- $i 1]]
+set mask [conjoin "|" $id];
+set sTemp [fCalcSetTmp $id];
 set_hc_ts "$mask" $sTemp;
 puts "[objname [lindex $cLsB [- $i 1]] ] $sTemp"
 }
+
+
+;#//Расчет уставки для ведущего как + 2 от текущей, но не более чем на +10
+proc fCalcSetTmp {id} {
+upvar #0 ls_idB2idDb LS;
+set idDB [lindex $LS [+ [lsearch $LS $id] 1]];
+set cTDB [get_id_DB $idDB];
+set Smax "[+ $cTDB 20] [+ [CSCD_req] 80]";
+return [lindex [lsort  -integer -decreasing $Smax] 0]
+}
+
 
 
 ;#//Определение id ЦШ для контуров котлов каскада
@@ -93,27 +114,26 @@ return $lsB_DB;
 }
 
 
-;#//Назначение списка id Котла - id ЦШ
-set ls_idB2idDb [f_ls_idB2idDb [fcurLsBoil]]
-
-
-
 ;#//Определение id ЦШ по id котлового контура
 proc idDB2idB {id} {
 return [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" $id "?"]] "\]"] 1] ","] 4];
 }
 
 
+;#//Назначение списка id Котла - id ЦШ
+set ls_idB2idDb [f_ls_idB2idDb [fCurLsBoil]]
 
-;#//Расчет уставки для ведущего как + 5 от текущей, но не более чем на +10
 
-
+;#// Запрос текущей температуры по id ЦШ
+proc get_t_DB {idDB} {
+return [ * [ + [ / [lindex [split [sendmess sel [conjoin "" "#Y" $idDB "?"]] ","] 7] 256] 273] 10]
+}
 
 
 ;#// Запрос текущей температуры по id котлового контура
-proc get_t_boil {id} {
+proc get_t_DB {id} {
 set idDB [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" $id "?"]] "\]"] 1] ","] 4];
-return [ * [ + [ / [lindex [split [sendmess sel [conjoin "" "#Y" $idDB "?"]] ","] 7] 256] 273] 10]
+return [get_id_DB $idDB]
 }
 
 
@@ -142,17 +162,6 @@ while {< $i [$count]} {
 lset lsTterm $i 1
 incr i
 }
-}
-
-
-;#//Запрос списка котлов в каскаже в моменте
-proc CountBoil {} {
-upvar #0 LsBoil LsBoil;
-upvar #0 CS_id CS_id;
-set s [getState $CS_id]
-set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
-set LenLsBiol [llength $LsBoil];
-return $LenLsBiol
 }
 
 
