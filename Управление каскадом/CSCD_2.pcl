@@ -79,6 +79,32 @@ puts "[objname [lindex $cLsB [- $i 1]] ] $sTemp"
 }
 
 
+;#//Определение id ЦШ для контуров котлов каскада
+proc f_ls_idB2idDb {lsB} {
+set len [llength $lsB];
+set lsB_DB "";
+set i 0;
+while {< $i [llength $lsB]} {
+set id [lindex $lsB $i];
+set lsB_DB "$lsB_DB $id [idDB2idB $id]";
+incr i;
+};
+return $lsB_DB;
+}
+
+
+;#//Определение id ЦШ по id котлового контура
+proc idDB2idB {id} {
+return [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" $id "?"]] "\]"] 1] ","] 4];
+}
+
+
+
+;#//Расчет уставки для ведущего как + 5 от текущей, но не более чем на +10
+
+
+
+
 ;#// Запрос текущей температуры по id котлового контура
 proc get_t_boil {id} {
 set idDB [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" $id "?"]] "\]"] 1] ","] 4];
