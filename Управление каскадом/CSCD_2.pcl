@@ -48,7 +48,7 @@ set MainBoil [idMain];
 set lsBoil [fLSBoilProp $CSCD_id];
 set pos [lsearch $lsBoil $MainBoil];
 set LenLsBiol [llength $lsBoil];
-set lsBoil [fLsBoil $lsBoil $pos $LenLsBiol]
+return [fLsBoil $lsBoil $pos $LenLsBiol]
 }
 
 
@@ -91,6 +91,11 @@ incr i;
 };
 return $lsB_DB;
 }
+
+
+;#//Назначение списка id Котла - id ЦШ
+set ls_idB2idDb [f_ls_idB2idDb [fcurLsBoil]]
+
 
 
 ;#//Определение id ЦШ по id котлового контура
