@@ -34,7 +34,7 @@ set MainBoil [idMain];
 set lsBoil [fLSBoilProp $CSCD_id];
 set pos [lsearch $lsBoil $MainBoil];
 set LenLsBiol [llength $lsBoil];
-set lsBoil [fLsBoil $lsBoil $pos $LenLsBiol]
+return [fLsBoil $lsBoil $pos $LenLsBiol]
 }
 
 proc fLSBoilProp {id} {
