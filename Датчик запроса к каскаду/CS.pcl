@@ -12,14 +12,14 @@
 
 
 set CSCD_id [objid "Каскад котлов" 40];
-//Поиск ведущего котла
+
 proc idMain {} {
 upvar #0 CSCD_id CSCD_id;
-set CSCD_state [getState $CSCD_id];
+set CSCD_state [split [getState $CSCD_id] ","];
 set idMain [lindex $CSCD_state [ -  [llength $CSCD_state] 3]];
 return $idMain
 }
-//Определение запроса к каскаду
+
 proc CSCD_req {} {
 upvar #0 CSCD_id CSCD_id;
 set CSCD_state [getState $CSCD_id];
@@ -27,7 +27,7 @@ set CSCD_req [lindex $CSCD_state [ -  [llength $CSCD_state] 2]];
 return $CSCD_req
 }
 
-//Запрос котлов в каскаде из списка настроек. 1 часть 
+
 proc fcurLsBoil {} {
 upvar #0 CSCD_id CSCD_id;
 set MainBoil [idMain];
@@ -36,20 +36,20 @@ set pos [lsearch $lsBoil $MainBoil];
 set LenLsBiol [llength $lsBoil];
 set lsBoil [fLsBoil $lsBoil $pos $LenLsBiol]
 }
-//Запрос котлов в каскаде из списка настроек. 2 часть 
+
 proc fLSBoilProp {id} {
 set s [getProp $id];
 set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
 return $LsBoil;
 }
-//Запрос котлов в каскаде из списка настроек. 3 часть. Сортировка котлов в каскаде от ведущего
+
 proc fLsBoil {lsBoil pos LenLsBiol} {
 set LsBoil "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]"
 }
 
 
 
-// Установка +50 для главного. Часть 1
+// Установка +50 для главного
 proc SetTCas {} {
 set cLsB [fcurLsBoil];
 set sT [get_t "КаскадЗапрос"];
@@ -60,17 +60,33 @@ SetMask $i $len $cLsB $sT;
 incr i;
 }
 }
-// Установка +50 для главного. Часть 2
+
+
+proc get_t_boil {id} {
+set idDB [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" 8212 "?"]] "\]"] 1] ","] 4];
+return [ * [ + [ / [lindex [split [sendmess sel [conjoin "" "#Y" $idDB "?"]] ","] 7] 256] 273] 10]
+}
+
 
 proc SetMask {i len cLsB sT} {
 set mask [conjoin "|" [lindex $cLsB [- $i 1]]];
-set sTemp [expr "$sT + 2730 + 50 - 120 * ($i - 1) "];
+set sTemp [expr "$sT + 2730 + 50 - 100 * ($i - 1) "];
 set_hc_ts "$mask" $sTemp;
 puts "[objname [lindex $cLsB [- $i 1]] ] $sTemp"
 }
 
 
 
+proc Therm {} {
+upvar #0 lsTterm lsTterm
+set count [objstate "CountWEB" 0 0 10];
+set lsTterm "0 0 0"
+set i 0;
+while {< $i [$count]} {
+lset lsTterm $i 1
+incr i
+}
+}
 
 
 proc CountBoil {} {
