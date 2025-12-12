@@ -1,0 +1,11 @@
+proc CorHF {e i n v} { 
+set cT [expr "[get_t "MDT_Пол"] + 2730"]; 
+set dT [expr "[get_hc_tns {^HF_PZA$}]-$cT"]; 
+set tS [get_hc_ts {^HF_PZA$}]; 
+if {>= $dT 1} { 
+set_hc_ts "HF_Cor" [+ $tS [* 5 $dT]]; 
+} else { 
+set_hc_ts "HF_Cor" $tS; 
+}} 
+ 
+setev min CorHF

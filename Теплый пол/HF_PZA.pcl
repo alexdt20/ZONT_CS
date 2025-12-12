@@ -1,6 +1,0 @@
-proc HF_set {e i n v} {
-set tmp [get_hc_tns {^ТП_смес$}] 
-set_hc_ts {^ТП$} $tmp
-}
-
-setev min HF_set 

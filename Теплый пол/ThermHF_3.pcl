@@ -1,0 +1,31 @@
+proc CountR {e i n v} {
+set i 1
+set state "0"
+while {< $i 4} {
+set state [+ $state [objstate "|88R$i" 0 0 10]];
+incr i
+}
+set state "1 $state"
+sendmess sel "{\"name\":"CountR",\"cmd\":$state,\"type\":0}"
+}
+
+
+proc ThermHFon {} {
+set cT [+ [get_t "MDT_Пол"] 2730];
+set dT [- $cT [get_hc_tns {^HF_PZA$}]];
+if {< $dT 5} {
+objcmd ThHF "0 20";
+storeev I "ThermHF on";
+} else {
+objcmd ThHF "0 180";
+storeev I "Пол перегет";
+}
+}
+
+proc ThermHFoff {} {
+objcmd ThHF "0 180";
+storeev I "ThermHF off";
+}
+
+setev rea "CountR@88R"
+setev min "CountR"

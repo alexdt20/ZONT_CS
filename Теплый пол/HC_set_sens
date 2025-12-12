@@ -1,6 +1,0 @@
-proc HC_sens {e i n v} {
-objcmd "HC_set_Миша" [get_hc_ts Миша] 1
-objcmd "HC_set_Кира" [get_hc_ts Кира] 1
-}
-
-setev min HC_sens

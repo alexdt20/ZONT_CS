@@ -1,0 +1,7 @@
+proc BoilState {} {
+set st [sendmess sel "#Y8217?"]
+set a [llength [split [lindex [split [lindex [split $st "\["] 1] "\]"] 0] ","]]
+objcmd State "0 [expr "$a * 10"]" 0
+}
+
+settim BoilState 5000 1

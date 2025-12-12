@@ -1,0 +1,21 @@
+proc hcts2sens {n} {
+set s [get_hc_ts $n];
+objcmd $n|hcSet $s 1
+}
+
+proc hctns2sens {n} {
+set s [get_hc_tns $n];
+objcmd $n|hcSet $s 1
+}
+
+
+proc doSens {} {
+hcts2sens Миша;
+hcts2sens Кира;
+hcts2sens Спальня;
+hctns2sens HF_PZA
+}
+
+
+
+settim "doSens" 10000 1
