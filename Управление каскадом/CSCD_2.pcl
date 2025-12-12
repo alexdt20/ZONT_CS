@@ -10,6 +10,39 @@
 // set s {#Y10813$[8201],[8201],[3423],[10814,8388,8430,8374,8416],607930,0,0,8201,3423,34}
 // set MainBiol [lindex [split [lindex [split $s "\]"] 4] ","] 4]
 
+
+;#_______________________
+;#// Линейный термостат
+
+proc fCulcLineSet {idDb nT nC} {
+set tT [get_hc_tns $nT];
+set cT [fGetTIdDB $idDb];
+set cS [get_hc_ts $nC];
+return [min [+ [max $cT $cS] 20] $tT]
+}
+
+
+proc fMainLineSet {} {
+set idDb "4096";
+set LineName "ПИД";
+set targName "|Hsep";
+set_hc_ts [fCulcLineSet $targName $LineName]
+}
+
+
+proc fGetTIdDB {idDB} {
+return [ * [ + [ / [lindex [split [sendmess sel [conjoin "" "#Y" $idDB "?"]] ","] 7] 256] 273] 10]
+}
+
+
+
+settim fMainLineSet 60000 1
+
+
+
+
+
+
 ;#// Запрос id Каскада
 set CSCD_id [objid "Каскад котлов" 40];
 
@@ -17,7 +50,7 @@ set CSCD_id [objid "Каскад котлов" 40];
 ;//Получение запроса к каскаду
 proc CSCD_req {} {
 upvar #0 CSCD_id CSCD_id;
-set CSCD_state [split [getState $CSCD_id] ","];
+set CSCD_state [split [fGetState $CSCD_id] ","];
 set CSCD_req [lindex $CSCD_state [ -  [llength $CSCD_state] 2]];
 return $CSCD_req
 }
@@ -26,7 +59,7 @@ return $CSCD_req
 ;#// Запрос ведущего котла
 proc idMain {} {
 upvar #0 CSCD_id CSCD_id;
-set CSCD_state [split [getState $CSCD_id] ","];
+set CSCD_state [split [fGetState $CSCD_id] ","];
 set idMain [lindex $CSCD_state [ -  [llength $CSCD_state] 3]];
 return $idMain
 }
@@ -35,7 +68,7 @@ return $idMain
 ;#//Запрос списка котлов в каскаде в моменте
 proc f_get_lsWkBoil {} {
 upvar #0 CSCD_id CSCD_id;
-set s [getState $CSCD_id];
+set s [fGetState $CSCD_id];
 set lsWkBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ","];
 return $lsWkBoil
 }
@@ -44,7 +77,7 @@ return $lsWkBoil
 ;#// Поучение списка котлов из настроек
 proc fLSBoilProp {} {
 upvar #0 CSCD_id id;
-set s [getProp $id];
+set s [fGetProp $id];
 set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
 return $LsBoil;
 }
@@ -79,7 +112,7 @@ incr i;
 }
 }
 
-;#// Расчет и применение уставки по списку из "Назначение уставок"
+;#// Расчет и применение уставки по списку из "Назначение уставок". Вариант 1
 proc SetMask {i len cLsB sT} {
 set id [lindex $cLsB [- $i 1]]
 set mask [conjoin "|" $id];
@@ -99,6 +132,17 @@ return [lindex [lsort  -integer -decreasing $Smax] 0]
 }
 
 
+;#// Расчет и применение уставки по списку из "Назначение уставок". Вариант 2
+proc SetMask {i len cLsB sT} {
+set mask [conjoin "|" [lindex $cLsB [- $i 1]]];
+if {== $i 1} {  
+set sTemp [expr "$sT + 2730 + 60"];
+} else {
+set sTemp [expr "450 + 2730 "];
+};
+set_hc_ts "$mask" $sTemp;
+}
+
 
 ;#//Определение id ЦШ для контуров котлов каскада
 proc f_ls_idB2idDb {lsB} {
@@ -107,16 +151,10 @@ set lsB_DB "";
 set i 0;
 while {< $i [llength $lsB]} {
 set id [lindex $lsB $i];
-set lsB_DB "$lsB_DB $id [idDB2idB $id]";
+set lsB_DB "$lsB_DB $id [fIdDB2idB $id]";
 incr i;
 };
 return $lsB_DB;
-}
-
-
-;#//Определение id ЦШ по id котлового контура
-proc idDB2idB {id} {
-return [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" $id "?"]] "\]"] 1] ","] 4];
 }
 
 
@@ -124,28 +162,34 @@ return [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" $id "?"]] "\
 set ls_idB2idDb [f_ls_idB2idDb [fCurLsBoil]]
 
 
+;#//Определение id ЦШ по id котлового контура
+proc fGetIdDbFromBoil {id} {
+return [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" $id "?"]] "\]"] 1] ","] 4];
+}
+
+
 ;#// Запрос текущей температуры по id ЦШ
-proc get_t_DB {idDB} {
+proc fGetTIdDB {idDB} {
 return [ * [ + [ / [lindex [split [sendmess sel [conjoin "" "#Y" $idDB "?"]] ","] 7] 256] 273] 10]
 }
 
 
 ;#// Запрос текущей температуры по id котлового контура
-proc get_t_DB {id} {
-set idDB [lindex [split [lindex [split [sendmess sel [conjoin "" "#Y" $id "?"]] "\]"] 1] ","] 4];
-return [get_id_DB $idDB]
+proc fFetTIdBoil {id} {
+set idDB [fGetIdDbFromBoil $id];
+return [fGetTIdDB $idDB]
 }
 
 
 ;#//Запрос состояния объекта по id
-proc getState {id} {
+proc fGetState {id} {
 set s [sendmess sel [conjoin "" "#Y" $id "?"]];
 return $s
 }
 
 
 ;#// Запрос параметров объекта по id из конфига (строка конфига по id)
-proc getProp {id} {
+proc fGetProp {id} {
 set s [sendmess sel [conjoin "" "#Z" $id "?"]];
 return $s
 }
