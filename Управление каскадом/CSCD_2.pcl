@@ -208,11 +208,13 @@ incr i
 }
 }
 
-
-;#//Глобальные переменные для ТВИ
-set LenLsBiol 0
-set TVI 0;
-set CountB 0;
+;# ТВИ____________________________________________________________________________
+;#//Получение гистерезиса каскада
+proc fGetCscdG {} {
+upvar #0 CS_id CSCD_id;
+set CSCD_data [split [sendmess sel [conjoin "" "#Z" $CSCD_id "?"]] ","];
+return [lindex $CSCD_data [ -  [llength $CSCD_data] 3]];
+}
 
 
 ;#//Расчет ТВИ при изменение количества котлов в моменте
@@ -232,11 +234,34 @@ pubSensT TVI $TVI
 
 ;#//Расчет ТВИ
 proc calcTVI {tvi} {
+upvar #0 CscdG CG;
 set cT [get_t [objname "4103"]];
-set sT [get_t "КаскадЗапрос"];
+set sT [fGetTt];
 set dT [- $cT $sT];
+pubSensT dTTVI $dT;
+if {> [abs $dT] $CG} {
 set TVI [lindex [split [expr "$tvi + $dT/20"] "."] 0];
 return $TVI
+}
+}
+
+proc fGetCt {} {
+return [get_t "КаскадЗапрос"]
+}
+
+proc fGetTt {} {
+return [- [get_hc_tns "Контур запроса тепла|CSCD"] 2730]
+}
+
+
+;#//Опрееделние количества котлов в работе
+proc CountBoil {} {
+upvar #0 LsBoil LsBoil;
+upvar #0 CS_id CS_id;
+set s [getState $CS_id];
+set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
+set LenLsBiol [llength $LsBoil];
+return $LenLsBiol
 }
 
 
@@ -246,4 +271,10 @@ sendmess sel "\{\"name\":\"$n\",\"cmd\":[+ $v 2730],\"type\":1\}"
 }
 
 ;#//Работа по таймеру для ТВИ
+set LenLsBiol 0;
+set TVI 0;
+set CountB 0;
+set CS_id [objid "Каскад котлов" 40];
+set CscdG [fGetCscdG];
+
 settim testTVI 5000 1
