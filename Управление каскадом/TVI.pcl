@@ -1,0 +1,71 @@
+;#//Глобальные переменные для ТВИ
+proc fGetCscdG {} {
+upvar #0 CS_id CSCD_id;
+set CSCD_data [split [sendmess sel [conjoin "" "#Z" $CSCD_id "?"]] ","];
+return [lindex $CSCD_data [ -  [llength $CSCD_data] 3]];
+}
+
+
+;#//Расчет ТВИ при изменение количества котлов в моменте
+proc testTVI {} {
+upvar #0 CountB CountB;
+upvar #0 TVI TVI;
+set cB [CountBoil];
+if {!= $CountB $cB} {
+set CountB $cB;
+set TVI 0;
+pubSensT TVI $TVI;
+} else {
+set TVI [calcTVI $TVI];
+pubSensT TVI [lindex [split $TVI "."] 0];
+}}
+
+
+;#//Определние количества котлов в каскаде
+proc CountBoil {} {
+upvar #0 LsBoil LsBoil;
+upvar #0 CS_id CS_id;
+set s [getState $CS_id];
+set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
+set LenLsBiol [llength $LsBoil];
+return $LenLsBiol
+}
+
+
+;#//Расчет ТВИ
+proc calcTVI {tvi} {
+upvar #0 CscdG CG;
+set cT [fGetCt];
+set sT [fGetTt];
+set dT [- $cT $sT];
+pubSensT dTTVI $dT;
+set TVI [expr "$tvi + $dT/6"];
+return $TVI
+}
+
+
+;#//Запрос требуемой температуры
+proc fGetTt {} {
+return [get_t "Каскад-гист"]
+}
+
+
+;#//Запрос фактической температуры температуры
+proc fGetCt {} {
+return [get_t "Подача из гидрострелки"]
+}
+
+
+;#//Создание и назначение значения в сенсор type 1
+proc pubSensT {n v} {
+sendmess sel "\{\"name\":\"$n\",\"cmd\":[+ $v 2730],\"type\":1\}"
+}
+
+;#//Работа по таймеру для ТВИ
+set LenLsBiol 0;
+set TVI 0;
+set CountB 0;
+set CS_id [objid "Каскад котлов" 40];
+set CscdG [fGetCscdG];
+
+settim testTVI 5000 1
