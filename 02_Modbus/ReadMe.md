@@ -49,7 +49,7 @@ ________________________
       >proc mbm {i e n v} {
       set len [llength $v];
       set i 0;
-      set rv ""
+      set rv "";
       while {< $i $len} {
       set x [lindex $v $pkt_s_pos];
       set rx [+ [/ $x 256] [* 256 [mod $x 256]]];
