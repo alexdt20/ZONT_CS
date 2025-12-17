@@ -54,7 +54,7 @@ ________________________
       set x [lindex $v $pkt_s_pos];
       set rx [+ [/ $x 256] [* 256 [mod $x 256]]];
       set rv "$rv $rx";
-      }
+      };
       puts $n ($rv)
       }
 _____
