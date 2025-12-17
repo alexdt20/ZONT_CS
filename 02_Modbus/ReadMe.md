@@ -51,7 +51,7 @@ ________________________
       set i 0;
       set rv "";
       while {< $i $len} {
-      set x [lindex $v $pkt_s_pos];
+      set x [lindex $v $i];
       set rx [+ [/ $x 256] [* 256 [mod $x 256]]];
       set rv "$rv $rx";
       };
