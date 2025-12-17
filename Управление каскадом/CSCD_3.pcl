@@ -32,7 +32,7 @@ set cB [min [+ CountB 1] 3]
 set cB [max [- CountB 1] 1]
 } else {
 set cB $CountB
-}
+};
 return $cB
 }
 
@@ -74,6 +74,7 @@ settim fTestTVI 5000 1
 
 
 ;#//________________________________________________________
+
 set TVIm "-40";
 set TVIp "80";
 
@@ -85,7 +86,7 @@ set sT [fGetTt];
 set i 1;
 while {<= $i $CountB} {
 fSetMask $i $CountB $cLsB $sT;
-incr i;
+incr i
 }
 }
 
@@ -98,7 +99,7 @@ set sTemp [expr "$sT + 2730 + 60 - 40 * ($i - 1)"];
 set sTemp [max $sTemp [- $sT 10]]
 } else {
 set sTemp [+ 450  2730];
-}
+};
 set_hc_ts "$mask" $sTemp;
 }
 
