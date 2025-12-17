@@ -56,7 +56,7 @@ ________________________
       set rv "$rv $rx";
       incr i
       };
-      puts $n ($rv)
+      puts "$n ($rv)"
       }
 _____
 
