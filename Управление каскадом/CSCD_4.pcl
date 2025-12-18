@@ -1,5 +1,3 @@
-;#// eval "proc test {} {$a$b}"
-
 ;#//Получение гистерезиса каскада
 proc fGetCscdG {} {
 upvar #0 CSCD_id CSCD_id;
@@ -16,13 +14,12 @@ set cB [fCountB $CountB $TVI];
 if {!= $CountB $cB} {
 set CountB $cB;
 set TVI 0;
-fSetTCas
+fSetTCas $cB;
 fPubSensT TVI $TVI
 } else {
 set TVI [fCalcTVI $TVI];
 fPubSensT TVI [fGetInt $TVI];
-};
-}
+}}
 
 
 ;#//Определние количества котлов в каскаде
@@ -72,8 +69,7 @@ sendmess sel "\{\"name\":\"$n\",\"cmd\":[+ $v 2730],\"type\":1\}"
 
 
 ;#// Назначение уставок
-proc fSetTCas {} {
-upvar #0 CountB CountB;
+proc fSetTCas {CountB} {
 upvar #0 cLsB cLsB;
 set sT [fGetTt];
 set i 1;
@@ -86,11 +82,16 @@ incr i}}
 proc fSetMask {i count cLsB sT} {
 set mask [fMakMask $i $cLsB];
 if {<= $i $count} {  
-set sTemp [expr "$sT + 2730 + 120 - 60 * ($i - 1)"];
+set sTemp [expr "$sT + 2730 + 140 - 80 * ($i - 1)"];
 set sTemp [max $sTemp [- $sT 10]]
 } else {
 set sTemp [+ 450  2730]};
-set_hc_ts "$mask" $sTemp}
+fRepSet "$mask" $sTemp}
+
+proc fRepSet {mask sTemp} {
+set_hc_ts "$mask" $sTemp;
+puts "[objname $mask] $sTemp ([- $sTemp 2730])"
+}
 
 
 proc fMakMask {i cLsB } {
