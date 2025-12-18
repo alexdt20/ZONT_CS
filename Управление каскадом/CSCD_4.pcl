@@ -1,3 +1,5 @@
+;#// eval "proc test {} {$a$b}"
+
 ;#//Получение гистерезиса каскада
 proc fGetCscdG {} {
 upvar #0 CSCD_id CSCD_id;
@@ -13,7 +15,6 @@ upvar #0 TVI TVI;
 set cB [fCountB $CountB $TVI];
 if {!= $CountB $cB} {
 set CountB $cB;
-set TVI 0;
 fSetTCas $cB;
 fPubSensT TVI $TVI
 } else {
@@ -44,6 +45,11 @@ proc fCalcTVI {tvi} {
 set cT [fGetCt];
 set sT [fGetTt];
 set dT [- $cT $sT];
+if {< $dT 0} {
+set dT [* 5 $dT]} else {
+if {> $dT 0} {
+if {< $dT 25} {
+set dT 0}}};
 fPubSensT dTTVI $dT;
 set TVI [expr "$tvi + $dT/6"];
 return $TVI
@@ -70,7 +76,9 @@ sendmess sel "\{\"name\":\"$n\",\"cmd\":[+ $v 2730],\"type\":1\}"
 
 ;#// Назначение уставок
 proc fSetTCas {CountB} {
+upvar #0 TVI TVI;
 upvar #0 cLsB cLsB;
+set TVI 0;
 set sT [fGetTt];
 set i 1;
 while {<= $i [llength $cLsB]} {
@@ -85,8 +93,14 @@ if {<= $i $count} {
 set sTemp [expr "$sT + 2730 + 140 - 80 * ($i - 1)"];
 set sTemp [max $sTemp [- $sT 10]]
 } else {
-set sTemp [+ 450  2730]};
+set sTemp [fS1 $i $sT]};
 fRepSet "$mask" $sTemp}
+
+proc fS1 {i sT} {
+return [- [+ $sT  2760] [* 10 $i]]
+}
+
+
 
 proc fRepSet {mask sTemp} {
 set_hc_ts "$mask" $sTemp;
@@ -172,7 +186,7 @@ return "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]"
 fUpdateBoilLs 1 2 3 4;
 setev hou fUpdateBoilLs
 
-set TVIm "-400";
+set TVIm "-450";
 set TVIp "800";
 ;#//Работа по таймеру для ТВИ
 set TVI 0;
