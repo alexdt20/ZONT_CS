@@ -145,8 +145,10 @@ return $LsBoil;
 
 
 proc fUpdateBoilLs {e i n v} {
+upvar #0 CountB CountB;
 upvar #0 cLsB cLsB;
 set cLsB [fCurLsBoil];
+fSetTCas $CountB
 }
 
 
