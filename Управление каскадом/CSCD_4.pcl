@@ -1,3 +1,5 @@
+;#// eval "proc test {} {$a$b}"
+
 ;#//Получение гистерезиса каскада
 proc fGetCscdG {} {
 upvar #0 CSCD_id CSCD_id;
@@ -14,12 +16,12 @@ set cB [fCountB $CountB $TVI];
 if {!= $CountB $cB} {
 set CountB $cB;
 set TVI 0;
+fSetTCas
 fPubSensT TVI $TVI
 } else {
 set TVI [fCalcTVI $TVI];
 fPubSensT TVI [fGetInt $TVI];
-}
-fSetTCas
+};
 }
 
 
@@ -29,14 +31,12 @@ upvar #0 TVIm TVIm;
 upvar #0 TVIp TVIp;
 set TVI [fGetInt $TVI];
 if {< $TVI $TVIm} {
-set cB [min [+ CountB 1] 3]
+set cB [min [+ $CountB 1] 3]
 } else {if {> $TVI $TVIp} {
-set cB [max [- CountB 1] 1]
+set cB [max [- $CountB 1] 1]
 } else {
-set cB $CountB
-};
-return $cB
-}}
+set cB $CountB};
+return $cB}}
 
 proc fGetInt {n} {
 return [lindex [split $n "."] 0]
@@ -55,7 +55,7 @@ return $TVI
 
 ;#//Запрос требуемой температуры
 proc fGetTt {} {
-return [- [get_hc_tns "Контур запроса тепла|CSCD"] 2680]
+return [- [get_hc_tns "Контур запроса тепла|CSCD"] 2730]
 }
 
 
@@ -70,15 +70,6 @@ proc fPubSensT {n v} {
 sendmess sel "\{\"name\":\"$n\",\"cmd\":[+ $v 2730],\"type\":1\}"
 }
 
-;#//Работа по таймеру для ТВИ
-set TVI 0;
-set CountB 1;
-set CscdG [fGetCscdG];
-settim fTestTVI 5000 1
-
-
-set TVIm "-400";
-set TVIp "800";
 
 ;#// Назначение уставок
 proc fSetTCas {} {
@@ -86,23 +77,24 @@ upvar #0 CountB CountB;
 upvar #0 cLsB cLsB;
 set sT [fGetTt];
 set i 1;
-while {<= $i $CountB} {
+while {<= $i [llength $cLsB]} {
 fSetMask $i $CountB $cLsB $sT;
-incr i
-}
-}
+incr i}}
 
 
 ;#// Расчет и применение уставки по списку из "Назначение уставок". Вариант 2
 proc fSetMask {i count cLsB sT} {
-set mask [conjoin "|" [lindex $cLsB [- $i 1]]];
+set mask [fMakMask $i $cLsB];
 if {<= $i $count} {  
-set sTemp [expr "$sT + 2730 + 80 - 60 * ($i - 1)"];
+set sTemp [expr "$sT + 2730 + 120 - 60 * ($i - 1)"];
 set sTemp [max $sTemp [- $sT 10]]
 } else {
-set sTemp [+ 450  2730];
-};
-set_hc_ts "$mask" $sTemp;
+set sTemp [+ 450  2730]};
+set_hc_ts "$mask" $sTemp}
+
+
+proc fMakMask {i cLsB } {
+return [conjoin "|" [lindex $cLsB [- $i 1]]];
 }
 
 
@@ -150,13 +142,11 @@ set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
 return $LsBoil;
 }
 
-setev hou fUpdateBoilLs
 
 proc fUpdateBoilLs {e i n v} {
 upvar #0 cLsB cLsB;
 set cLsB [fCurLsBoil];
 }
-
 
 
 ;#// Формирование списка котлов по порядку
@@ -174,3 +164,16 @@ return [fSortLsBoil $lsBoil $pos $LenLsBiol]
 proc fSortLsBoil {lsBoil pos LenLsBiol} {
 return "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]"
 }
+
+
+fUpdateBoilLs 1 2 3 4;
+setev hou fUpdateBoilLs
+
+set TVIm "-400";
+set TVIp "800";
+;#//Работа по таймеру для ТВИ
+set TVI 0;
+set CountB 1;
+set CscdG [fGetCscdG];
+settim fTestTVI 5000 1
+
