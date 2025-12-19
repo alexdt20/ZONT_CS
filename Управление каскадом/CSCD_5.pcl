@@ -1,5 +1,3 @@
-;#// eval "proc test {} {$a$b}"
-
 ;#//Получение гистерезиса каскада
 proc fGetCscdG {} {
 upvar #0 CSCD_id CSCD_id;
@@ -35,7 +33,8 @@ set TVI 0
 set cB [max [- $CountB 1] 1];
 set TVI 0
 } else {
-set cB $CountB};
+return $CountB};
+break;
 };
 return $cB}
 
