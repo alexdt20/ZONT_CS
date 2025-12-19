@@ -1,3 +1,10 @@
+;#// eval "proc test {} {$a$b}"
+
+
+>puts "$TVI $CountB"
+
+
+
 ;#//Получение гистерезиса каскада
 proc fGetCscdG {} {
 upvar #0 CSCD_id CSCD_id;
@@ -27,11 +34,11 @@ upvar #0 TVIm TVIm;
 upvar #0 TVIp TVIp;
 set TVI [fGetInt $TVI];
 if {< $TVI $TVIm} {
+set TVI 0    
 return [min [+ $CountB 1] 3];
-set TVI 0
 } else {if {> $TVI $TVIp} {
-return [max [- $CountB 1] 1];
 set TVI 0
+return [max [- $CountB 1] 1];
 } else {
 return $CountB};
 }}
@@ -162,7 +169,7 @@ proc fUpdateBoilLs {e i n v} {
 upvar #0 CountB CountB;
 upvar #0 cLsB cLsB;
 set cLsB [fCurLsBoil];
-fSetTCas $CountB
+fSetTCas
 }
 
 
