@@ -1,5 +1,3 @@
-;#// eval "proc test {} {$a$b}"
-
 ;#//Получение гистерезиса каскада
 proc fGetCscdG {} {
 upvar #0 CSCD_id CSCD_id;
