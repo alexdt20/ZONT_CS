@@ -100,7 +100,7 @@ proc fSetMask {i count cLsB sT} {
 set mask [fMakMask $i $cLsB];
 if {<= $i $count} {  
 set sTemp [expr "$sT + 2730 + 100 - 80 * ($i - 1)"];
-set sTemp [max $sTemp [- $sT 10]]
+set sTemp [max $sTemp [+ $sT 2740]]
 } else {
 set sTemp [fS1 $i $sT]};
 fRepSet "$mask" $sTemp}
