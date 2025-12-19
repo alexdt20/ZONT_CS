@@ -1,0 +1,200 @@
+;#//Получение гистерезиса каскада
+proc fGetCscdG {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_data [split [fGetProp $CSCD_id] ","];
+return [lindex $CSCD_data [ -  [llength $CSCD_data] 3]];
+}
+
+
+;#//Расчет ТВИ при изменение количества котлов в моменте
+proc fTestTVI {} {
+upvar #0 CountB CountB;
+upvar #0 TVI TVI;
+set cB [fCountB $CountB $TVI];
+if {!= $CountB $cB} {
+set CountB $cB;
+fSetTCas;
+fPubSensT TVI $TVI
+} else {
+set TVI [fCalcTVI $TVI];
+fPubSensT TVI [fGetInt $TVI];
+}}
+
+
+;#//Определние количества котлов в каскаде
+proc fCountB {CountB TVI} {
+upvar #0 TVIm TVIm;
+upvar #0 TVIp TVIp;
+set TVI [fGetInt $TVI];
+if {< $TVI $TVIm} {
+set cB [min [+ $CountB 1] 3]
+} else {if {> $TVI $TVIp} {
+set cB [max [- $CountB 1] 1]
+} else {
+set cB $CountB};
+return $cB}}
+
+proc fGetInt {n} {
+return [lindex [split $n "."] 0]
+}
+
+;#//Расчет ТВИ
+proc fCalcTVI {tvi} {
+set cT [fGetCt];
+set sT [fGetTt];
+set dT [- $cT $sT];
+if {< $dT -10} {
+set dT $dT} else {
+if {>= $dT -10} {
+if {< $dT 10} {
+set dT 0}}};
+fPubSensT dTTVI $dT;
+set TVI [expr "$tvi + $dT/6"];
+return $TVI
+}
+
+
+;#//Запрос требуемой температуры
+proc fGetTt {} {
+return [- [CSCD_req] 2770 ]
+}
+
+
+;#//Запрос фактической температуры температуры
+proc fGetCt {} {
+return [get_t "Подача из гидрострелки"]
+}
+
+
+;#//Создание и назначение значения в сенсор type 1
+proc fPubSensT {n v} {
+sendmess sel "\{\"name\":\"$n\",\"cmd\":[+ $v 2730],\"type\":1\}"
+}
+
+
+;#// Назначение уставок
+proc fSetTCas {} {
+upvar #0 CountB CountB;
+upvar #0 TVI TVI;
+upvar #0 cLsB cLsB;
+set TVI 0;
+set sT [fGetTt];
+set i 1;
+while {<= $i [llength $cLsB]} {
+fSetMask $i $CountB $cLsB $sT;
+incr i}}
+
+
+;#// Расчет и применение уставки по списку из "Назначение уставок". Вариант 2
+proc fSetMask {i count cLsB sT} {
+set mask [fMakMask $i $cLsB];
+if {<= $i $count} {  
+set sTemp [expr "$sT + 2730 + 100 - 80 * ($i - 1)"];
+set sTemp [max $sTemp [- $sT 10]]
+} else {
+set sTemp [fS1 $i $sT]};
+fRepSet "$mask" $sTemp}
+
+
+proc fS1 {i sT} {
+return [- [+ $sT  2730] [* 20 $i]]
+}
+
+proc fRepSet {mask sTemp} {
+set_hc_ts "$mask" $sTemp;
+puts "[objname $mask] $sTemp ([- $sTemp 2730])"
+}
+
+
+proc fMakMask {i cLsB } {
+return [conjoin "|" [lindex $cLsB [- $i 1]]];
+}
+
+
+;#//Запрос состояния объекта по id
+proc fGetState {id} {
+set s [sendmess sel [conjoin "" "#Y" $id "?"]];
+return $s
+}
+
+
+;#// Запрос параметров объекта по id из конфига (строка конфига по id)
+proc fGetProp {id} {
+set s [sendmess sel [conjoin "" "#Z" $id "?"]];
+return $s
+}
+
+
+;#// Запрос id Каскада
+set CSCD_id [objid "Каскад котлов" 40];
+
+
+;//Получение запроса к каскаду
+proc fCSCD_req {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_state [split [fGetState $CSCD_id] ","];
+set CSCD_req [lindex $CSCD_state [ -  [llength $CSCD_state] 2]];
+return $CSCD_req
+}
+
+
+;#// Запрос ведущего котла
+proc fIdMain {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_state [split [fGetState $CSCD_id] ","];
+set idMain [lindex $CSCD_state [ -  [llength $CSCD_state] 3]];
+return $idMain
+}
+
+
+;#// Поучение списка котлов из настроек
+proc fLSBoilProp {} {
+upvar #0 CSCD_id id;
+set s [fGetProp $id];
+set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
+return $LsBoil;
+}
+
+
+proc fUpdateBoilLs {e i n v} {
+upvar #0 CountB CountB;
+upvar #0 cLsB cLsB;
+set cLsB [fCurLsBoil];
+fSetTCas $CountB
+}
+
+
+;#// Формирование списка котлов по порядку
+proc fCurLsBoil {} {
+upvar #0 CSCD_id CSCD_id;
+set MainBoil [fIdMain];
+set lsBoil [fLSBoilProp];
+set pos [lsearch $lsBoil $MainBoil];
+set LenLsBiol [llength $lsBoil];
+return [fSortLsBoil $lsBoil $pos $LenLsBiol]
+}
+
+
+;#// Сортировка котлов "от ведущего"
+proc fSortLsBoil {lsBoil pos LenLsBiol} {
+return "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]"
+}
+
+
+fUpdateBoilLs 1 2 3 4;
+setev hou fUpdateBoilLs
+
+set TVIm "-450";
+set TVIp "800";
+;#//Работа по таймеру для ТВИ
+set TVI 0;
+set CountB 1;
+set CscdG [fGetCscdG];
+settim fTestTVI 5000 1
+
+proc CSCD_req {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_state [split [fGetState $CSCD_id] ","];
+set CSCD_req [lindex $CSCD_state [ -  [llength $CSCD_state ] 2]];
+return $CSCD_req
+}
