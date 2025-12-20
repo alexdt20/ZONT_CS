@@ -69,14 +69,15 @@ proc fTVI0 {TVI} {
 upvar #0 CountTVI CountTVI;
 upvar #0 TVIlast TVIlast;
 incr CountTVI;
-if {>= $CountTVI 120} {
+if {> $CountTVI 120} {
 set TVIlast 0;
 set CountTVI 0;
 return 0
 } else {
 if {== $TVI $TVIlast} {
 incr CountTVI};
-set TVIlast $TVI};
+set TVIlast $TVI} else {
+set CountTVI 0};
 return $TVI}
 
 set CountTVI 0;
