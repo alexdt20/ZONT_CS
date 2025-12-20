@@ -45,6 +45,7 @@ return $CountB};
 }}
 
 
+
 proc fGetInt {n} {
 return [lindex [split $n "."] 0]
 }
@@ -57,13 +58,30 @@ set dT [- $cT $sT];
 if {< $dT -10} {
 set dT $dT} else {
 if {>= $dT -15} {
-if {< $dT 15} {
+if {< $dT 25} {
 set dT 0}}};
 fPubSensT dTTVI $dT;
-set TVI [fGetInt [expr "$tvi + $dT/3"]];
-return $TVI
-}
+return [fTVI0 [fGetInt [expr "$tvi + $dT/3"]]]}
 
+
+proc fTVI0 {TVI} {
+upvar #0 CountTVI CountTVI;
+upvar #0 TVIlast TVIlast;
+incr CountTVI;
+if {> $CountTVI 120} {
+set TVIlast 0;
+set CountTVI 0;
+return 0;
+} else {
+if {== $TVI $TVIlast} {
+incr CountTVI} else {
+set CountTVI 0;
+set TVIlast $TVI}};
+return $TVI}
+
+
+set CountTVI 0;
+set TVIlast $TVI
 
 ;#//Запрос требуемой температуры
 proc fGetTt {} {
