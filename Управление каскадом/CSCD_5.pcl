@@ -60,7 +60,7 @@ if {>= $dT -15} {
 if {< $dT 15} {
 set dT 0}}};
 fPubSensT dTTVI $dT;
-set TVI [expr "$tvi + $dT/6"];
+set TVI [fGetInt [expr "$tvi + $dT/3"]];
 return $TVI
 }
 
@@ -200,7 +200,7 @@ set TVIp "800";
 set TVI 0;
 set CountB 1;
 set CscdG [fGetCscdG];
-settim fTestTVI 5000 1
+settim fTestTVI 10000 1
 
 proc CSCD_req {} {
 upvar #0 CSCD_id CSCD_id;
