@@ -125,7 +125,7 @@ fRepSet "$mask" $sTemp}
 
 
 ;#// Расчет установки с учетом накопленного дефицита
-proc fS1 {i sT} {
+proc fS3 {i sT} {
 upvar #0 TVI TVI;
 set x 0;
 if {< $TVI 0} {
@@ -134,10 +134,21 @@ set x [min [abs [fGetInt [/ $TVI 6]]] 80]
 return [expr "$sT + 2730 + 100 - 70 * ($i - 1) + $x"]
 }
 
+proc fS1 {i sT} {
+upvar #0 TVI TVI;
+set x 0;
+if {<= $TVI 0} {
+set x [max [fGetInt [/ $TVI 6]] -80]
+} else {
+set x [min [fGetInt [/ $TVI 10]] 50];
+};
+return [ - [expr "$sT + 2730 + 100 - 70 * ($i - 1)"] $x]
+}
+
 
 ;#// Расчет установки для котла в дежурном режиме (вне каскада)
 proc fS2 {i sT} {
-return [- [+ $sT  2730] [* 10 $i]]
+return [- [+ $sT  2730] [* 15 $i]]
 }
 
 
