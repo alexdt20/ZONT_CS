@@ -55,11 +55,9 @@ proc fCalcTVI {tvi} {
 set cT [fGetCt];
 set sT [fGetTt];
 set dT [- $cT $sT];
-if {< $dT -10} {
-set dT $dT} else {
-if {>= $dT -15} {
-if {< $dT 25} {
-set dT 0}}};
+if {>= $dT -10} {
+if {< $dT 10} {
+set dT 0}};
 fPubSensT dTTVI $dT;
 return [fTVI0 [fGetInt [expr "$tvi + $dT/3"]]]}
 
@@ -118,7 +116,7 @@ proc fSetMask {i count cLsB sT} {
 set mask [fMakMask $i $cLsB];
 if {<= $i $count} {  
 set sTemp [fS1 $i $sT];
-set sTemp [max $sTemp [+ $sT 2730]]
+set sTemp [max $sTemp [+ $sT 2720]]
 } else {
 set sTemp [fS2 $i $sT]};
 fRepSet "$mask" $sTemp}
@@ -129,7 +127,7 @@ set x 0;
 if {< $TVI 0} {
 set x [min [abs [fGetInt [/ $TVI 6]]] 80]
 };
-return [expr "$sT + 2730 + 100 - 80 * ($i - 1) + $x"]
+return [expr "$sT + 2730 + 100 - 70 * ($i - 1) + $x"]
 }
 
 proc fS2 {i sT} {
