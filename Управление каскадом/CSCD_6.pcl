@@ -68,16 +68,17 @@ proc fTVI0 {TVI} {
 upvar #0 CountTVI CountTVI;
 upvar #0 TVIlast TVIlast;
 incr CountTVI;
-if {> $CountTVI 120} {
+if {> $CountTVI 200} {
 set TVIlast 0;
 set CountTVI 0;
 return 0;
 } else {
-if {<= [abs [- $TVI $TVIlast]] 20} {
+if {== $TVI $TVIlast} {
 incr CountTVI} else {
 set CountTVI 0;
 set TVIlast $TVI}};
 return $TVI}
+
 
 set CountTVI 0;
 set TVIlast $TVI
@@ -116,14 +117,22 @@ incr i}}
 proc fSetMask {i count cLsB sT} {
 set mask [fMakMask $i $cLsB];
 if {<= $i $count} {  
-set sTemp [expr "$sT + 2730 + 100 - 80 * ($i - 1)"];
+set sTemp [fS1 $i $sT];
 set sTemp [max $sTemp [+ $sT 2740]]
 } else {
-set sTemp [fS1 $i $sT]};
+set sTemp [fS2 $i $sT]};
 fRepSet "$mask" $sTemp}
 
-
 proc fS1 {i sT} {
+upvar #0 TVI TVI;
+set x 0;
+if {< $TVI 0} {
+set x [min [abs [fGetInt [/ $TVI 6]]] 80]
+};
+return [expr "$sT + 2730 + 100 - 80 * ($i - 1) + $x"]
+}
+
+proc fS2 {i sT} {
 return [- [+ $sT  2730] [* 10 $i]]
 }
 
