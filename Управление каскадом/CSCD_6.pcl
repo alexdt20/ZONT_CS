@@ -45,10 +45,11 @@ return $CountB};
 }}
 
 
-
+;#//Отсечение дробной части
 proc fGetInt {n} {
 return [lindex [split $n "."] 0]
 }
+
 
 ;#//Расчет ТВИ
 proc fCalcTVI {tvi} {
@@ -56,17 +57,17 @@ set cT [fGetCt];
 set sT [fGetTt];
 set dT [- $cT $sT];
 if {>= $dT -10} {
-if {< $dT 10} {
+if {< $dT 12} {
 set dT 0}};
 fPubSensT dTTVI $dT;
-return [fTVI0 [fGetInt [expr "$tvi + $dT/3"]]]}
+return [fGetInt [expr "$tvi + $dT/3"]]}
 
-
+;#// счетчиков стабилизации системы (исключено)
 proc fTVI0 {TVI} {
 upvar #0 CountTVI CountTVI;
 upvar #0 TVIlast TVIlast;
 incr CountTVI;
-if {> $CountTVI 200} {
+if {> $CountTVI 360} {
 set TVIlast 0;
 set CountTVI 0;
 return 0;
@@ -78,6 +79,7 @@ set TVIlast $TVI}};
 return $TVI}
 
 
+;#// Начальная иницыализация счетчиков стабилизации системы (исключено)
 set CountTVI 0;
 set TVIlast $TVI
 
@@ -121,6 +123,8 @@ set sTemp [max $sTemp [+ $sT 2720]]
 set sTemp [fS2 $i $sT]};
 fRepSet "$mask" $sTemp}
 
+
+;#// Расчет установки с учетом накопленного дефицита
 proc fS1 {i sT} {
 upvar #0 TVI TVI;
 set x 0;
@@ -130,16 +134,20 @@ set x [min [abs [fGetInt [/ $TVI 6]]] 80]
 return [expr "$sT + 2730 + 100 - 70 * ($i - 1) + $x"]
 }
 
+
+;#// Расчет установки для котла в дежурном режиме (вне каскада)
 proc fS2 {i sT} {
 return [- [+ $sT  2730] [* 10 $i]]
 }
 
+
+;#// ЛогРепорт по установкам
 proc fRepSet {mask sTemp} {
 set_hc_ts "$mask" $sTemp;
 puts "[objname $mask] $sTemp ([- $sTemp 2730])"
 }
 
-
+;#// Формирование маски Алиса для текущего i котла
 proc fMakMask {i cLsB } {
 return [conjoin "|" [lindex $cLsB [- $i 1]]];
 }
@@ -190,6 +198,7 @@ return $LsBoil;
 }
 
 
+;#// Обновление списка котла (мониториг ротации)
 proc fUpdateBoilLs {e i n v} {
 upvar #0 CountB CountB;
 upvar #0 cLsB cLsB;
@@ -215,17 +224,24 @@ return "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]"
 }
 
 
+;#// Начальная инициализация каскада котлов
 fUpdateBoilLs 1 2 3 4;
 setev hou fUpdateBoilLs
 
+
+;#// Начальная иницыализация лимитов ТВИ
 set TVIm "-450";
 set TVIp "800";
+
+
 ;#//Работа по таймеру для ТВИ
 set TVI 0;
 set CountB 1;
 set CscdG [fGetCscdG];
 settim fTestTVI 10000 1
 
+
+;#// Получение запроса к каскаду
 proc CSCD_req {} {
 upvar #0 CSCD_id CSCD_id;
 set CSCD_state [split [fGetState $CSCD_id] ","];
