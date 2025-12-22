@@ -125,22 +125,27 @@ fRepSet "$mask" $sTemp}
 
 
 ;#// Расчет установки с учетом накопленного дефицита
-proc fS3 {i sT} {
+
+proc fS1_1 {i sT} {
 upvar #0 TVI TVI;
-set x 0;
-if {< $TVI 0} {
-set x [min [abs [fGetInt [/ $TVI 6]]] 80]
+set x [+ $i 9];
+if {<= $TVI 0} {
+set x [max [fGetInt [/ [* $TVI $x ] 100] ] -80]
+} else {
+set x [min [fGetInt [/ [* $TVI $x ] 140] ] 50];
 };
-return [expr "$sT + 2730 + 100 - 70 * ($i - 1) + $x"]
+return [ - [expr "$sT + 2730 + 100 - 80 * ($i - 1)"] $x]
 }
+
+;#// Расчет установки с учетом накопленного дефицита
 
 proc fS1 {i sT} {
 upvar #0 TVI TVI;
 set x 0;
 if {<= $TVI 0} {
-set x [max [fGetInt [/ $TVI 6]] -80]
+set x [max [fGetInt [/ $TVI 10]] -80]
 } else {
-set x [min [fGetInt [/ $TVI 8]] 50];
+set x [min [fGetInt [/ $TVI 14]] 50];
 };
 return [ - [expr "$sT + 2730 + 100 - 80 * ($i - 1)"] $x]
 }
