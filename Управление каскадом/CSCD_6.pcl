@@ -140,9 +140,9 @@ set x 0;
 if {<= $TVI 0} {
 set x [max [fGetInt [/ $TVI 6]] -80]
 } else {
-set x [min [fGetInt [/ $TVI 10]] 50];
+set x [min [fGetInt [/ $TVI 8]] 50];
 };
-return [ - [expr "$sT + 2730 + 100 - 70 * ($i - 1)"] $x]
+return [ - [expr "$sT + 2730 + 100 - 80 * ($i - 1)"] $x]
 }
 
 
