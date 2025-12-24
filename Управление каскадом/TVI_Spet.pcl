@@ -32,6 +32,7 @@ proc fCountB {CountB} {
 upvar #0 TVI TVI;
 upvar #0 TVIm TVIm;
 upvar #0 TVIp TVIp;
+upvar #0 StpCount StpCount;
 set tvi [fGetInt $TVI];
 if {< $tvi $TVIm} {
 set TVI 0;
@@ -55,11 +56,11 @@ proc fCalcTVI {tvi} {
 set cT [fGetCt];
 set sT [fGetTt];
 set dT [- $cT $sT];
-if {>= $dT -10} {
-if {< $dT 12} {
-set dT 0}};
 fPubSensT dTTVI $dT;
-return [fGetInt [expr "$tvi + $dT/3"]]}
+if {>= $dT -15} {
+if {< $dT 15} {
+set dt 0}};
+return [fGetInt [expr "$tvi + $dt/3"]]}
 
 
 ;#//Запрос требуемой температуры
@@ -117,15 +118,20 @@ set sLs "-80 -80 -80";
 return $sLs
 }
 
+set StpCount 15
+set DTS 100
+set StpB 5
 
 ;#//Расчет количества котлов и установки 
 proc fCulcSet {Level} {
-set Mod [mod $Level 5];
+upvar #0 StpB StpB
+upvar #0 DTS DTS
+set Mod [mod $Level $StpB];
 set i [- $Level $Mod];
 set Ls "[* 20 $Mod]";
 while {> $i 0} {
-set Ls "100 $Ls";
-set i [- $i 5];
+set Ls "$DTS $Ls";
+set i [- $i $StpB];
 };
 set Ls [fCorSLS $Ls];
 return $Ls
