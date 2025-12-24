@@ -1,0 +1,261 @@
+;#// eval "proc test {} {$a$b}"
+
+
+>puts "$TVIm   $TVI   $TVIp $CountB"
+
+
+;#//Получение гистерезиса каскада
+proc fGetCscdG {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_data [split [fGetProp $CSCD_id] ","];
+return [lindex $CSCD_data [ -  [llength $CSCD_data] 3]];
+}
+
+
+;#//Расчет ТВИ при изменение количества котлов в моменте
+proc fTestTVI {} {
+upvar #0 CountB CountB;
+upvar #0 TVI TVI;
+set cB [fCountB $CountB];
+if {!= $CountB $cB} {
+set CountB $cB;
+fSetTCas;
+fPubSensT TVI $TVI
+} else {
+set TVI [fCalcTVI $TVI];
+fPubSensT TVI [fGetInt $TVI];
+}}
+
+
+;#//Определние количества котлов в каскаде
+proc fCountB {CountB} {
+upvar #0 TVI TVI;
+upvar #0 TVIm TVIm;
+upvar #0 TVIp TVIp;
+set tvi [fGetInt $TVI];
+if {< $tvi $TVIm} {
+set TVI 0;
+return [min [+ $CountB 1] 15]
+} else {if {> $tvi $TVIp} {
+set TVI 0;
+return [max [- $CountB 1] 1];
+} else {
+return $CountB};
+}}
+
+
+;#//Отсечение дробной части
+proc fGetInt {n} {
+return [lindex [split $n "."] 0]
+}
+
+
+;#//Расчет ТВИ
+proc fCalcTVI {tvi} {
+set cT [fGetCt];
+set sT [fGetTt];
+set dT [- $cT $sT];
+if {>= $dT -10} {
+if {< $dT 12} {
+set dT 0}};
+fPubSensT dTTVI $dT;
+return [fGetInt [expr "$tvi + $dT/3"]]}
+
+
+;#//Запрос требуемой температуры
+proc fGetTt {} {
+return [- [fCSCD_req] 2770 ]
+}
+
+
+;#//Запрос фактической температуры температуры
+proc fGetCt {} {
+return [get_t "Подача из гидрострелки"]
+}
+
+
+;#//Создание и назначение значения в сенсор type 1
+proc fPubSensT {n v} {
+sendmess sel "\{\"name\":\"$n\",\"cmd\":[+ $v 2730],\"type\":1\}"
+}
+
+
+;#// Назначение уставок
+proc fSetTCas {} {
+upvar #0 CountB CountB;
+upvar #0 cLsB cLsB;
+puts "fSetTCas";
+set LsSet [fLsSet $CountB];
+set sT [+ [fGetTt] 2730];
+set i 0;
+while {< $i [llength $cLsB]} {
+set LsSeti [lindex $LsSet $i];
+fSetMask $i $LsSeti $cLsB $sT;
+incr i;
+} }
+
+
+
+
+;#//Формирование списка установок
+proc fLsSet {Level} {
+set sLs [fInitSLs];
+set CulcSet [fCulcSet $Level];
+set len [llength $CulcSet];
+set i 0;
+while {< $i $len} {
+lset sLs $i [lindex $CulcSet $i];
+incr i
+};
+return $sLs
+}
+
+
+;#//Инициализация базовой коррекции установки
+proc fInitSLs {} {
+set sLs "-80 -80 -80";
+return $sLs
+}
+
+
+;#//Расчет количества котлов и установки 
+proc fCulcSet {Level} {
+set Mod [mod $Level 5];
+set i [- $Level $Mod];
+set Ls "[* 20 $Mod]";
+while {> $i 0} {
+set Ls "100 $Ls";
+set i [- $i 5];
+};
+set Ls [fCorSLS $Ls];
+return $Ls
+}
+
+
+;#//Задание вылета для 1-го котла
+proc fCorSLS {Ls} {
+if {> [llength $Ls] 1 } {
+lset Ls 0 [+ [lindex $Ls 0] 40];
+};
+return $Ls;
+}
+
+
+;#// Расчет и применение уставки по списку из "Назначение уставок". Вариант 2
+proc fSetMask {i LsSeti cLsB sT} {
+set mask [fMakMask $i $cLsB];
+set sTemp [+ $sT $LsSeti];
+fRepSet "$mask" $sTemp
+}
+
+
+;#// Формирование маски Алиса для текущего i котла
+proc fMakMask {i cLsB } {
+return [conjoin "|" [lindex $cLsB $i]];
+}
+// ;#// Коррекция установки с учетом накопленной ошибки (исключено)
+// proc fS1 {i sT} {
+// upvar #0 TVI TVI;
+// set x [+ $i 9];
+// if {<= $TVI 0} {
+// set x [max [fGetInt [/ [* $TVI $x ] 100] ] -80]
+// } else {
+// set x [min [fGetInt [/ [* $TVI $x ] 140] ] 50];
+// };
+// return [ - [expr "$sT + 2730 + 100 - 80 * ($i - 1)"] $x]
+// }
+
+
+;#// ЛогРепорт по установкам
+proc fRepSet {mask sTemp} {
+set_hc_ts "$mask" $sTemp;
+puts "[objname $mask] $sTemp ([- $sTemp 2730])"
+}
+
+
+;#//Запрос состояния объекта по id
+proc fGetState {id} {
+set s [sendmess sel [conjoin "" "#Y" $id "?"]];
+return $s
+}
+
+
+;#// Запрос параметров объекта по id из конфига (строка конфига по id)
+proc fGetProp {id} {
+set s [sendmess sel [conjoin "" "#Z" $id "?"]];
+return $s
+}
+
+
+;#// Запрос id Каскада
+set CSCD_id [objid "Каскад котлов" 40];
+
+
+;//Получение запроса к каскаду
+proc fCSCD_req {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_state [split [fGetState $CSCD_id] ","];
+set CSCD_req [lindex $CSCD_state [ -  [llength $CSCD_state] 2]];
+return $CSCD_req
+}
+
+
+;#// Запрос ведущего котла
+proc fIdMain {} {
+upvar #0 CSCD_id CSCD_id;
+set CSCD_state [split [fGetState $CSCD_id] ","];
+set idMain [lindex $CSCD_state [ -  [llength $CSCD_state] 3]];
+return $idMain
+}
+
+
+;#// Поучение списка котлов из настроек
+proc fLSBoilProp {} {
+upvar #0 CSCD_id id;
+set s [fGetProp $id];
+set LsBoil [split [lindex [split [lindex [split $s "\["] 1] "\]"] 0] ,];
+return $LsBoil;
+}
+
+
+;#// Обновление списка котла (мониториг ротации)
+proc fUpdateBoilLs {e i n v} {
+upvar #0 CountB CountB;
+upvar #0 cLsB cLsB;
+set cLsB [fCurLsBoil];
+fSetTCas
+}
+
+
+;#// Формирование списка котлов по порядку
+proc fCurLsBoil {} {
+upvar #0 CSCD_id CSCD_id;
+set MainBoil [fIdMain];
+set lsBoil [fLSBoilProp];
+set pos [lsearch $lsBoil $MainBoil];
+set LenLsBiol [llength $lsBoil];
+return [fSortLsBoil $lsBoil $pos $LenLsBiol]
+}
+
+
+;#// Сортировка котлов "от ведущего"
+proc fSortLsBoil {lsBoil pos LenLsBiol} {
+return "[lrange $lsBoil $pos [- $LenLsBiol 1]] [lrange $lsBoil 0 [- $pos 1]]"
+}
+
+
+;#// Начальная инициализация каскада котлов
+fUpdateBoilLs 1 2 3 4;
+setev hou fUpdateBoilLs
+
+
+;#// Начальная иницыализация лимитов ТВИ
+set TVIm "-250";
+set TVIp "250";
+
+
+;#//Работа по таймеру для ТВИ
+set TVI 0;
+set CountB 1;
+set CscdG [fGetCscdG];
+settim fTestTVI 10000 1
