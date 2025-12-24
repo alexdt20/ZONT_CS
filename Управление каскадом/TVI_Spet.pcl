@@ -1,7 +1,7 @@
 ;#// eval "proc test {} {$a$b}"
 
 
->puts "$TVIm   $TVI   $TVIp $CountB"
+>puts "$TVIm   $TVI   $TVIp    $CountB"
 
 
 ;#//Получение гистерезиса каскада
@@ -57,8 +57,8 @@ set cT [fGetCt];
 set sT [fGetTt];
 set dT [- $cT $sT];
 fPubSensT dTTVI $dT;
-if {>= $dT -15} {
-if {< $dT 15} {
+if {>= $dT -18} {
+if {< $dT 18} {
 set dT 0}};
 return [fGetInt [expr "$tvi + $dT/3"]]}
 
@@ -118,14 +118,15 @@ set sLs "-80 -80 -80";
 return $sLs
 }
 
-set StpCount 15
-set DTS 100
-set StpB 5
+set StpCount 17;
+set StpB 6;
+set DTS [* 20 $StpB];
+
 
 ;#//Расчет количества котлов и установки 
 proc fCulcSet {Level} {
-upvar #0 StpB StpB
-upvar #0 DTS DTS
+upvar #0 StpB StpB;
+upvar #0 DTS DTS;
 set Mod [mod $Level $StpB];
 set i [- $Level $Mod];
 set Ls "[* 20 $Mod]";
