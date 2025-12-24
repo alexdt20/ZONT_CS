@@ -59,8 +59,8 @@ set dT [- $cT $sT];
 fPubSensT dTTVI $dT;
 if {>= $dT -15} {
 if {< $dT 15} {
-set dt 0}};
-return [fGetInt [expr "$tvi + $dt/3"]]}
+set dT 0}};
+return [fGetInt [expr "$tvi + $dT/3"]]}
 
 
 ;#//Запрос требуемой температуры
