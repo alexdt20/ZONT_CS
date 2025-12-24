@@ -118,10 +118,6 @@ set sLs "-80 -80 -80";
 return $sLs
 }
 
-set StpCount 17;
-set StpB 6;
-set DTS [* 20 $StpB];
-
 
 ;#//Расчет количества котлов и установки 
 proc fCulcSet {Level} {
@@ -257,12 +253,18 @@ setev hou fUpdateBoilLs
 
 
 ;#// Начальная иницыализация лимитов ТВИ
-set TVIm "-250";
-set TVIp "250";
+set TVIm "-350";
+set TVIp "300";
 
 
 ;#//Работа по таймеру для ТВИ
+set NumBoil 3
+set StpB 6;
+set StpCount [- [* $NumBoil $StpB] 1];
+set DTS [* 20 $StpB];
+
 set TVI 0;
 set CountB 1;
 set CscdG [fGetCscdG];
 settim fTestTVI 10000 1
+
