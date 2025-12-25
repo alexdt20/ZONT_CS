@@ -1,9 +1,3 @@
-;#// eval "proc test {} {$a$b}"
-
-
->puts "$TVIm   $TVI   $TVIp    $CountB $CountTVI"
-
-
 ;#//Получение гистерезиса каскада
 proc fGetCscdG {} {
 upvar #0 CSCD_id CSCD_id;
@@ -18,6 +12,7 @@ upvar #0 CountB CountB;
 upvar #0 TVI TVI;
 set cB [fCountB $CountB];
 if {!= $CountB $cB} {
+settim "fCalcTVI $TVI" 120000 0;
 set CountB $cB;
 fSetTCas;
 fPubSensT TVI $TVI
@@ -33,11 +28,11 @@ proc fCountB {CountB} {
 upvar #0 TVI TVI;
 upvar #0 TVIm TVIm;
 upvar #0 TVIp TVIp;
-upvar #0 StpCount StpCount;
+upvar #0 StpMax StpMax;
 set tvi [fGetInt $TVI];
 if {< $tvi $TVIm} {
 set TVI 0;
-return [min [+ $CountB 1] 15]
+return [min [+ $CountB 2] $StpMax]
 } else {if {> $tvi $TVIp} {
 set TVI 0;
 return [max [- $CountB 1] 1];
@@ -52,15 +47,30 @@ return [lindex [split $n "."] 0]
 }
 
 
+;#//Сброс при большой дельте
+proc fDT2CountB {} {
+upvar #0 TVI TVI;
+upvar #0 CountB CountB;
+set TVI 0;
+settim "fCalcTVI 0" 600000 0;
+storeev I "fDT2CountB";
+set CountB [- $CountB 1];
+fSetTCas
+}
+
+
 ;#//Расчет ТВИ
 proc fCalcTVI {tvi} {
 set cT [fGetCt];
 set sT [fGetTt];
 set dT [- $cT $sT];
 fPubSensT dTTVI $dT;
+if {== [gettim fCalcTVI] 0} {
 if {>= $dT -18} {
 if {< $dT 18} {
-set dT 0}};
+set dT 0}}} else {
+set dT 0
+};
 return [fTVI0 [fGetInt [expr "$tvi + $dT/3"]]]}
 
 
@@ -145,9 +155,10 @@ return $sLs
 proc fCulcSet {Level} {
 upvar #0 StpB StpB;
 upvar #0 DTS DTS;
+upvar #0 Stp Stp;
 set Mod [mod $Level $StpB];
 set i [- $Level $Mod];
-set Ls "[* 20 $Mod]";
+set Ls "[* $Stp $Mod]";
 while {> $i 0} {
 set Ls "$DTS $Ls";
 set i [- $i $StpB];
@@ -280,13 +291,25 @@ set TVIp "300";
 
 
 ;#//Работа по таймеру для ТВИ
-set NumBoil 3
-set StpB 6;
-set StpCount [- [* $NumBoil $StpB] 1];
-set DTS [* 20 $StpB];
+set NumBoil 3;
+set StpB 12;
+set DTS [* $Stp $StpB];
+set Stp 10;
+set StpMax [- [* $NumBoil $StpB] 1];
 
 set TVI 0;
 set CountB 1;
 set CscdG [fGetCscdG];
 settim fTestTVI 10000 1
 
+
+proc fInfoTVI {} {
+upvar #0 TVI TVI;
+upvar #0 TVIm TVIm;
+upvar #0 TVIp TVIp;
+upvar #0 StpMax StpMax;
+upvar #0 Stp Stp;
+upvar #0 DTS DTS;
+upvar #0 CountB CountB;
+puts "TVIm:$TVIm; TVI:$TVI; TVIp:$TVIp; StpMax:$StpMax; Stp:$Stp; DTS:$DTS; CountB:$CountB ;TimefCalcTVI: [gettim fCalcTVI]"
+}
