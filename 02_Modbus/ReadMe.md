@@ -5,10 +5,10 @@ https://www.modbustools.com/download.html
 
       >proc d2b {num} {
       set bits "";
-      set i 1;
+      set i 0;
       while {> $num 0} {
-      set remainder [mod $num 2];
-      set bits "[max [* $remainder $i] 0]-$bits";
+      set rem [mod $num 2];
+      set bits "$i:$rem - $bits";
       set num [/ $num 2];
       incr i;
       };
