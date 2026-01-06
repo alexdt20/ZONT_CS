@@ -1,7 +1,8 @@
 proc ADB_sens {} {
 set s [sendmess sel "\{\"req_state\":0,\"id\":4097\}"];
 set press [expr "[lindex [split [lindex [lindex [split $s ","] 0] 3] ":"] 1]*10"];
-objcmd "Давление" "0 $press" 0
+objcmd "Press" "0 $press" 0
 }
 
 settim "ADB_sens" 5000 1
+
