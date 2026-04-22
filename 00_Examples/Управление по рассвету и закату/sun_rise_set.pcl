@@ -1,0 +1,55 @@
+proc calc_day {} {
+  set month "31 28 31 30 31 30 31 31 30 31 30 31 "
+  set d 0
+  catch {set d [eval "+ [lrange $month 0 [- [gettime M] 2]]"]}
+  set d [+ $d [gettime D]]
+return $d
+}
+
+proc calc_sun_rise {} {
+  set day [calc_day ]
+  upvar #0 latitude latitude
+  upvar #0 corr corr
+  upvar #0 sunrise sunrise
+  upvar #0 sunset sunset
+  set d [expr "12*(acos(-tan($latitude*3.14/180)*tan(23.45*sin(($day+284)*(2*3.14)/365)*3.14/180)))/3.14"]
+  set sunrise [expr "round(60*(12-$d)-$corr)"]
+  set sunset [expr "round(60*(12+$d)-$corr)"]
+}
+
+proc f_day {z y a x} {
+  calc_sun_rise
+}
+
+proc is_day {} {
+  upvar #0 sunrise sunrise
+  upvar #0 sunset sunset
+  set m [ +  [ *  [gettime h] 60] [gettime m]]
+  if {and [>= $m $sunrise] [< $m $sunset]} {
+    return 1
+  }
+return 0
+}
+
+proc f_day_analise {y z a x} {
+  upvar #0 day_state day_state
+  set d [is_day ]
+  if {!= $d $day_state} {
+    set day_state $d
+    if {> $d 0} {
+      objcmd "”правление рассвет" "1" 5
+    } else {
+      objcmd "”правление закат" "1" 5
+    }
+  }
+}
+
+
+set day_state -1
+set latitude "56.32867"
+set corr 0
+set sunrise 0
+set sunset 0
+calc_sun_rise
+setev min "f_day_analise"
+setev day "f_day"

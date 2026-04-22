@@ -1,0 +1,10 @@
+proc battary_bassein {} {
+  set T_internet [objstate "Погода из интернета" 1 0]
+  set T_pol_bass [objstate "ПОЛ Бассейн" 1 0]
+  if {and [< $T_internet 180] [<= $T_pol_bass 260]} {
+    objcmd "Батареи (К2)" "24" 16
+  }
+}
+
+
+settim "battary_bassein" 10000 1

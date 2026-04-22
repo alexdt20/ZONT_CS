@@ -1,0 +1,24 @@
+proc f_tm_test {e i n v} {
+  settim "f_tm_1" 3000 2
+  puts "Начало теста таймеров"
+}
+
+proc f_tm_1 {} {
+  settim "f_tm_2" 5000 2
+  objcmd "Действие 1" 0
+  puts "Сработал таймер 1"
+}
+
+proc f_tm_2 {} {
+  settim "f_tm_3" 5000 2
+  objcmd "Действие 2" 0
+  puts "Сработал таймер 2"
+}
+
+proc f_tm_3 {} {
+  puts "Сработал таймер 3"
+  objcmd "Действие 3" 0
+}
+
+
+setev lo "f_tm_test@тест таймеров"

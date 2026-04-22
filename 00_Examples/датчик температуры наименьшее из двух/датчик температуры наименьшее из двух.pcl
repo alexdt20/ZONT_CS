@@ -1,0 +1,15 @@
+proc f_sens {} {
+  set t1 [get_t "Датчик 1"]
+  set t2 [get_t "Датчик 2"]
+  set str ""
+  if {> $t1 $t2} {
+    set str [conjoin "" $str $t2]
+  } else {
+    set str [conjoin "" $str $t1]
+  }
+  objcmd "Датчик 3" $str
+  puts [conjoin "" "Датчик 3 = " [get_t "Датчик 3"]]
+}
+
+
+settim "f_sens" 5000 1

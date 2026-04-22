@@ -1,0 +1,11 @@
+proc f_inmsg {e i n v} {
+  if {>= [string first "моя команда" [string tolower $v]] 0} {
+    objcmd "Действие 1" 0
+    objcmd "Действие 2" 0
+    objcmd "Действие 3" 0
+    puts "Ok"
+  }
+}
+
+
+setev inm "f_inmsg"

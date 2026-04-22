@@ -1,0 +1,16 @@
+proc getolist {t m} {
+  set v ""
+  set k 1
+  objiter
+  while {> $k 0} {
+    set k [objiter $t]
+    if {> $k 0} {
+      set s [objname $k]
+      set r [lindex [reg $m $s] 0]
+      if {>= $r 0} {
+        set v [conjoin " " $v \{$s\}]
+      }
+    }
+  }
+return $v
+}

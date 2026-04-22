@@ -1,0 +1,16 @@
+proc d2b {num} {
+set bits "";
+set i 1
+while {> $num 0} {
+set remainder [mod $num 2];
+set bits "[max [* $remainder $i] 0]-$bits";
+set num [/ $num 2];
+incr i
+};
+return $bits;
+}
+
+proc state {} {
+set st [objstate "Датчик Статус 2" 0 0];
+storeev I "[d2b $st]"
+}

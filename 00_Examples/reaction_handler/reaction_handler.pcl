@@ -1,0 +1,7 @@
+proc f_reaction {ev id name2 val} {
+  set x [conjoin "" "Событие: " $ev ", id: " $id ", name: " $name2 ", val: " $val]
+  puts $x
+}
+
+
+setev rea "f_reaction"

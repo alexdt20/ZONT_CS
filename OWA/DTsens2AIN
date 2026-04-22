@@ -1,0 +1,6 @@
+proc owa_pres {} {
+set tmp [get_t давление_owa]
+objcmd "Давление" "0 $tmp"
+}
+
+settim owa_pres 5000 1

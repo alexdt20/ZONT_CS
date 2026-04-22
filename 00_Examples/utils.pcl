@@ -1,0 +1,3 @@
+proc get_hc_tns {h} {return [lindex [split [lindex [split [string range [sendmess sel [conjoin "" "#Y" [objid "$h" 16] "?"]] 2 20] $] 1] ,] 0]}
+proc get_hc_ts {h} {return [lindex [split [sendmess sel [conjoin "" "#Y" [objid "$h" 16] "?"]] ,] 1]}
+proc set_hc_ts  {h v} {sendmess sel [conjoin "" "#Y" [objid "$h" 16] "=" $v]}

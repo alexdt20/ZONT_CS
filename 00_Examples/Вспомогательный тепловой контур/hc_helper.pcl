@@ -1,0 +1,21 @@
+proc hc_helper_1s {} {
+  set k 1
+  set i 0
+  objiter
+  while {> $k 0} {
+    set k [objiter 16]
+    if {> $k 0} {
+      set s [objname $k]
+      set r [lindex [reg {\|=>} $s] 0]
+      if {> $r 0} {
+        set hc [string range $s [+ $r 3] 999]
+        set ts [get_hc_ts $s]
+        if {> $ts 5} {set ts [- $ts 5]}
+        catch {set_hc_ts ^$hc\$ $ts}
+      }
+    }
+  }
+}
+
+
+settim "hc_helper_1s" 1000 1

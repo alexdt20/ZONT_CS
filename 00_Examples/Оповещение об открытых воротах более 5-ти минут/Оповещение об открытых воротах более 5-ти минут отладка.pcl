@@ -1,0 +1,22 @@
+proc f_vorota_alarm {ev id name2 val} {
+  upvar #0 vorota_period vorota_period
+  puts "vorota alarm"
+  settim "f_vorota_notif" $vorota_period 0
+}
+
+proc f_vorota_recovery {ev id name2 val} {
+  puts "vorota recovery"
+  settim "f_vorota_notif" 0
+}
+
+proc f_vorota_notif {} {
+  puts "vorota timer"
+  objcmd "SMS: ¬Œ–Œ“¿ Œ“ –€“€ ¡ŒÀ≈≈ 5-ÚË ÏËÌÛÚ" 1 3
+}
+
+
+set sensor_vorot "—Ã  ¬Œ–Œ“¿"
+set vorota_period 300000
+setev ala [conjoin "" "f_vorota_alarm@" $sensor_vorot]
+setev rec [conjoin "" "f_vorota_recovery@" $sensor_vorot]
+puts "init vorota ok"
