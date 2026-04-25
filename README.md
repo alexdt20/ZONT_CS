@@ -6,7 +6,7 @@
 
  [Progr_v1](https://drive.google.com/file/d/1JEg6Wu409BzNMZkDGUuUK4ZZP6ToX1KM/view****) - Off-line терминал с доступом к ФС (в том числе по RS485)
 
-[VK bot](https://m.vk.com/club237837556) - бот работает с API ZONT и позволяет управлять устройством аналогично приложению (VK работает в белых списках). Крайне рекомендую выполнять авторизацию через заране получение token!
+[VK bot](https://m.vk.com/club237837556) - бот работает с API ZONT и позволяет управлять устройством аналогично приложению (VK работает в белых списках). Крайне рекомендую выполнять авторизацию через заране получение token [TokenManager](https://github.com/alexdt20/ZONT_CS/blob/main/ZontAPITokManager)!
 
 **[WEB редактор SCRIPTS 2](https://zse2.elifantiev.ru)** - On-line Web редактор от пользователя (Благодарность Олегу за его труд) - временно не работает
 
