@@ -85,7 +85,8 @@ findstr /C:"\"ok\":true" "%respfile%" >nul
 if %errorlevel% equ 0 (
     echo Tokens list:
     echo.
-    powershell -Command "$j=Get-Content '%respfile%'|ConvertFrom-Json; if($j.auth_tokens.Count -gt 0){$j.auth_tokens|Format-Table @{N='#';E={[array]::IndexOf($j.auth_tokens,$_)+1}},token_id,client_name,@{N='Created';E={if($_.created){[DateTimeOffset]::FromUnixTimeSeconds($_.created).ToString('yyyy-MM-dd HH:mm')}else{'N/A'}}},@{N='LastUsed';E={if($_.last_used){[DateTimeOffset]::FromUnixTimeSeconds($_.last_used).ToString('yyyy-MM-dd HH:mm')}else{'Never'}}}} -AutoSize; Write-Host ('Total: '+$j.auth_tokens.Count) -ForegroundColor Green}else{Write-Host 'No tokens found' -ForegroundColor Yellow}"
+    REM Упрощенный вывод без Format-Table
+    powershell -Command "$j=Get-Content '%respfile%'|ConvertFrom-Json; if($j.auth_tokens.Count -gt 0){ $i=1; Write-Host ('='*80); Write-Host ('{0,-5} {1,-35} {2,-20} {3,-20} {4,-20}') -f 'No.','Token ID','Client Name','Created','Last Used'; Write-Host ('='*80); foreach($t in $j.auth_tokens){ $created=''; if($t.created){ $created=[DateTimeOffset]::FromUnixTimeSeconds($t.created).ToString('yyyy-MM-dd HH:mm') }; $last=''; if($t.last_used){ $last=[DateTimeOffset]::FromUnixTimeSeconds($t.last_used).ToString('yyyy-MM-dd HH:mm') }else{ $last='Never' }; Write-Host ('{0,-5} {1,-35} {2,-20} {3,-20} {4,-20}') -f $i, $t.token_id, $t.client_name, $created, $last; $i++ }; Write-Host ('='*80); Write-Host ('Total tokens: '+$j.auth_tokens.Count) -ForegroundColor Green } else { Write-Host 'No tokens found' -ForegroundColor Yellow }"
 ) else (
     echo ERROR:
     type "%respfile%"
@@ -115,7 +116,8 @@ set "respfile=%temp%\zont_list2.json"
 curl -X GET "https://my.zont.online/api/widget/v3/authtokens" -H "Content-Type: application/json" -H "Authorization: Basic %b64%" -H "X-ZONT-Client: %email%" -s -o "%respfile%"
 
 echo.
-powershell -Command "$j=Get-Content '%respfile%'|ConvertFrom-Json; if($j.auth_tokens.Count -gt 0){$i=1; Write-Host 'Your tokens:' -ForegroundColor Cyan; Write-Host ('-'*60); foreach($t in $j.auth_tokens){Write-Host ('['+$i+'] '+$t.token_id+' ('+$t.client_name+')'); $i++} }else{Write-Host 'No tokens found' -ForegroundColor Yellow; exit 1}"
+REM Упрощенный вывод списка токенов для выбора
+powershell -Command "$j=Get-Content '%respfile%'|ConvertFrom-Json; if($j.auth_tokens.Count -gt 0){ Write-Host 'Your tokens:' -ForegroundColor Cyan; Write-Host ('-'*80); $i=1; foreach($t in $j.auth_tokens){ Write-Host ('['+$i+'] '+$t.token_id+' ('+$t.client_name+')'); $i++ } } else { Write-Host 'No tokens found' -ForegroundColor Yellow; exit 1 }"
 
 if %errorlevel% neq 0 (
     del "%respfile%" 2>nul
