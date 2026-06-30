@@ -1,0 +1,32 @@
+proc fGetState {id} {
+set s [split [sendmess sel "#Y$id?"] ","];
+return $s
+}
+
+
+proc fBoilState {} {
+set id "4097";
+set s [fGetState $id];
+set rawState [lindex $s 2];
+fRawState $rawState;
+return $rawState
+}
+
+proc fStateDHW {} {
+set rawState [fBoilState];
+if {> [+ [== $rawState 782] [== $rawState 524]] 0} {
+settim fOffDHW 0 0;
+objcmd StateDWH "0 180"} else {
+if {== 0 [gettim fOffDHW]} {
+settim fOffDHW 240000 1
+}}}
+
+proc fRawState {n} {
+objcmd rawState "0 [* $n 10]";
+}
+
+proc fOffDHW {} {
+objcmd StateDWH "0 20"
+}
+
+settim fStateDHW 10000 1
